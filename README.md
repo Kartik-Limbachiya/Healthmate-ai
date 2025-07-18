@@ -18,3 +18,6 @@ go into the fitness-website by cd
 firstly do - git pull
 then npm install(not everytime, only at start)
 then - npm run dev
+
+
+live product video demonstration :- https://youtu.be/YiPUTCamF2M?si=YTp2EIvDhP8TdPlu
