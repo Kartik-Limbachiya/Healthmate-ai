@@ -1,5 +1,8 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"; // Import router
 import { Clock, Flame, BarChart, Bookmark } from "lucide-react"
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,7 +18,16 @@ const allWorkouts = [
     difficulty: "Intermediate",
     duration: "30 min",
     calories: "350",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/9015.mp4",
+    equipment: "No Equipment",
+    steps: [
+      "Warm up for 5 minutes.",
+      "Perform 30 seconds of burpees.",
+      "Rest for 15 seconds.",
+      "Repeat for 8 rounds.",
+      "Cool down for 5 minutes.",
+    ],
+    youtubeUrl: "https://www.youtube.com/embed/J212vz33gU4",
   },
   {
     id: 2,
@@ -24,7 +36,16 @@ const allWorkouts = [
     difficulty: "Beginner",
     duration: "25 min",
     calories: "220",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/2006.mp4",
+    equipment: "Minimal",
+    steps: [
+      "Warm up for 5 minutes.",
+      "Perform 30 seconds of plank.",
+      "Rest for 15 seconds.",
+      "Repeat for 8 rounds.",
+      "Cool down for 5 minutes.",
+    ],
+    youtubeUrl: "https://www.youtube.com/embed/fMrzBkHA_94?si=jovZwyhY_ftmrMIS",
   },
   {
     id: 3,
@@ -33,7 +54,8 @@ const allWorkouts = [
     difficulty: "Advanced",
     duration: "45 min",
     calories: "400",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/7006.mp4",
+    equipment: "Full Gym",
   },
   {
     id: 4,
@@ -42,7 +64,8 @@ const allWorkouts = [
     difficulty: "All Levels",
     duration: "40 min",
     calories: "180",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/10020.mp4",
+    equipment: "No Equipment",
   },
   {
     id: 5,
@@ -51,7 +74,8 @@ const allWorkouts = [
     difficulty: "Intermediate",
     duration: "20 min",
     calories: "280",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/9006.mp4",
+    equipment: "Minimal",
   },
   {
     id: 6,
@@ -60,7 +84,8 @@ const allWorkouts = [
     difficulty: "Intermediate",
     duration: "35 min",
     calories: "320",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/4063.mp4",
+    equipment: "Full Gym",
   },
   {
     id: 7,
@@ -69,7 +94,8 @@ const allWorkouts = [
     difficulty: "Advanced",
     duration: "25 min",
     calories: "380",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/5025.mp4",
+    equipment: "Minimal",
   },
   {
     id: 8,
@@ -78,7 +104,8 @@ const allWorkouts = [
     difficulty: "Beginner",
     duration: "30 min",
     calories: "200",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/5054.mp4",
+    equipment: "No Equipment",
   },
   {
     id: 9,
@@ -87,17 +114,71 @@ const allWorkouts = [
     difficulty: "Advanced",
     duration: "50 min",
     calories: "500",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/9025.mp4",
+    equipment: "Minimal",
   },
 ]
 
 interface WorkoutsListProps {
   category?: string
+  searchTerm?: string
+  difficulty?: string | null
+  duration?: string | null
+  equipment?: string | null
 }
 
-export default function WorkoutsList({ category }: WorkoutsListProps) {
-  // Filter workouts by category if provided
-  const workouts = category ? allWorkouts.filter((workout) => workout.category === category) : allWorkouts
+export default function WorkoutsList({
+  category,
+  searchTerm = "",
+  difficulty,
+  duration,
+  equipment,
+}: WorkoutsListProps) {
+  const router = useRouter(); // Initialize the router
+
+  // 1. Filter by category if provided
+  let workouts = category ? allWorkouts.filter((w) => w.category === category) : [...allWorkouts]
+
+  // 2. Partial search by title
+  if (searchTerm.trim() !== "") {
+    const lowerSearch = searchTerm.toLowerCase()
+    workouts = workouts.filter((w) => w.title.toLowerCase().includes(lowerSearch))
+  }
+
+  // 3. Filter by difficulty
+  if (difficulty) {
+    if (difficulty === "Beginner") {
+      workouts = workouts.filter((w) => w.difficulty === "Beginner")
+    } else if (difficulty === "Intermediate") {
+      workouts = workouts.filter((w) => w.difficulty === "Intermediate")
+    } else if (difficulty === "Advanced") {
+      workouts = workouts.filter((w) => w.difficulty === "Advanced")
+    }
+  }
+
+  // 4. Filter by duration
+  if (duration) {
+    workouts = workouts.filter((w) => {
+      const numericDuration = Number.parseInt(w.duration, 10)
+      if (duration === "< 15 min") {
+        return numericDuration < 15
+      } else if (duration === "15-30 min") {
+        return numericDuration >= 15 && numericDuration <= 30
+      } else if (duration === "30+ min") {
+        return numericDuration > 30
+      }
+      return true
+    })
+  }
+
+  // 5. Filter by equipment
+  if (equipment) {
+    workouts = workouts.filter((w) => w.equipment === equipment)
+  }
+
+  if (workouts.length === 0) {
+    return <p className="mt-8">No workouts found.</p>
+  }
 
   return (
     <div className="mt-8">
@@ -105,12 +186,16 @@ export default function WorkoutsList({ category }: WorkoutsListProps) {
         {workouts.map((workout) => (
           <Card key={workout.id} className="overflow-hidden h-full">
             <div className="relative h-48 w-full overflow-hidden group">
-              <Image
-                src={workout.image || "/placeholder.svg"}
-                alt={workout.title}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-              />
+              {workout.image.endsWith(".mp4") ? (
+                <video src={workout.image} autoPlay loop muted className="object-cover h-full w-full" />
+              ) : (
+                <Image
+                  src={workout.image || "/placeholder.svg"}
+                  alt={workout.title}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              )}
               <div className="absolute top-3 right-3 flex gap-2">
                 <Badge className="bg-primary">{workout.category}</Badge>
               </div>
@@ -123,6 +208,7 @@ export default function WorkoutsList({ category }: WorkoutsListProps) {
                 <span className="sr-only">Save workout</span>
               </Button>
             </div>
+
             <CardHeader className="pb-2">
               <CardTitle className="text-xl">
                 <Link href={`/workouts/${workout.id}`} className="hover:underline">
@@ -150,7 +236,9 @@ export default function WorkoutsList({ category }: WorkoutsListProps) {
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/workouts/${workout.id}`}>View Details</Link>
               </Button>
-              <Button size="sm">Start Workout</Button>
+              <Button size="sm" onClick={() => router.push(`/workouts/LiveWorkout`)}>
+                Start Live Workout
+              </Button>
             </CardFooter>
           </Card>
         ))}
@@ -158,4 +246,3 @@ export default function WorkoutsList({ category }: WorkoutsListProps) {
     </div>
   )
 }
-

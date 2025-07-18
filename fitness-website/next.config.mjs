@@ -1,12 +1,13 @@
-let userConfig = undefined
+let userConfig = undefined;
 try {
-  userConfig = await import('./v0-user-next.config')
+  userConfig = await import('./v0-user-next.config');
 } catch (e) {
-  // ignore error
+  // ignore error if file not found
 }
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Removed `output: 'export'` to enable SSR for dynamic routes
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -14,21 +15,19 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    unoptimized: true, // Optional: remove this if using <Image> component properly
   },
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-}
+};
 
-mergeConfig(nextConfig, userConfig)
+mergeConfig(nextConfig, userConfig);
 
 function mergeConfig(nextConfig, userConfig) {
-  if (!userConfig) {
-    return
-  }
+  if (!userConfig) return;
 
   for (const key in userConfig) {
     if (
@@ -38,11 +37,11 @@ function mergeConfig(nextConfig, userConfig) {
       nextConfig[key] = {
         ...nextConfig[key],
         ...userConfig[key],
-      }
+      };
     } else {
-      nextConfig[key] = userConfig[key]
+      nextConfig[key] = userConfig[key];
     }
   }
 }
 
-export default nextConfig
+export default nextConfig;
