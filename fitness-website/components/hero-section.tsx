@@ -27,7 +27,7 @@ export default function HeroSection() {
 
       <div className="absolute inset-0 overflow-hidden opacity-20">
         <Image
-          src="/placeholder.svg?height=1080&width=1920"
+          src="https://i.postimg.cc/CxB2Vv0b/temp35.jpg"
           alt="Health background"
           fill
           className="object-cover"
@@ -109,7 +109,7 @@ export default function HeroSection() {
                 className="absolute -top-2 -left-2 w-24 h-24 bg-primary rounded-full opacity-70 animate-pulse"
                 style={{ animationDuration: "4s" }}
               ></div>
-              <Image src="/placeholder.svg?height=800&width=600" alt="Health trainer" fill className="object-cover" />
+              <Image src="https://i.postimg.cc/43pFYmmd/temp34.jpg" alt="Health trainer" fill className="object-cover" />
 
               {/* Animated stats overlay */}
               <div className="absolute bottom-4 left-4 right-4 bg-black/50 backdrop-blur-sm rounded-lg p-3 z-20 transform transition-transform hover:scale-105">
