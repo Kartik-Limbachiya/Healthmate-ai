@@ -6,12 +6,12 @@ import { getDatabase } from "firebase/database";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyC7wvfc0qig_oC3F6ZhYaUpk18Pu6MeLyA",
-  authDomain: "healthmate-93d2c.firebaseapp.com",
-  projectId: "healthmate-93d2c",
-  storageBucket: "healthmate-93d2c.firebasestorage.app",
-  messagingSenderId: "822469032869",
-  appId: "1:822469032869:web:f417df05b159afb668064c"
+  apiKey: "AIzaSyAthQ2oIZPyC3s8JcHfyWyzV9wCuG52YDE",
+  authDomain: "healthmate-2004.firebaseapp.com",
+  projectId: "healthmate-2004",
+  storageBucket: "healthmate-2004.firebasestorage.app",
+  messagingSenderId: "513162731414",
+  appId: "1:513162731414:web:2bc9fcbf74d2097fb8c7b7"
 };
 // Initialize Firebase only once
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
