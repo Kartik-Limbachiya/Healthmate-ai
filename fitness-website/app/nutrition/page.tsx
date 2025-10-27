@@ -11,17 +11,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 
 // Import your MealPlansList component
-import MealPlansList from "@/components/meal-plans-list";
+import MealPlansList from "@/components/meal-plans-list"; // Ensure this path is correct
+
+// 1. IMPORT THE NUTRITION CALCULATOR COMPONENT
+import NutritionCalculator from "@/components/NutritionCalculator"; // Adjust path if needed
 
 export default function NutritionPage() {
-  // 1. States for search & filters
+  // States for search & filters
   const [searchTerm, setSearchTerm] = useState("");
   const [dietTypes, setDietTypes] = useState<string[]>([]);
   const [calorieRanges, setCalorieRanges] = useState<string[]>([]);
   const [goals, setGoals] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // 2. Handlers
+  // Handlers (keep these as they are)
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -45,7 +48,6 @@ export default function NutritionPage() {
   };
 
   const applyFilters = () => {
-    // Close the dialog
     setIsFilterOpen(false);
   };
 
@@ -66,17 +68,18 @@ export default function NutritionPage() {
       {/* Search & Filter Row */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         {/* Search Box */}
-        <div className="relative w-full md:w-164">
+        <div className="relative w-full md:w-164"> {/* Increased width */}
           <Input
             type="search"
             placeholder="Search meal plans..."
-            className="pl-8"
+            className="pl-8" // Added padding for icon
             value={searchTerm}
             onChange={handleSearchChange}
           />
+          {/* Search Icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" // Centered icon
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -94,7 +97,7 @@ export default function NutritionPage() {
           </DialogTrigger>
 
           {/* Filter Dialog */}
-          <DialogContent className="max-w-4xl sm:max-w-4xl">
+          <DialogContent className="max-w-4xl sm:max-w-4xl"> {/* Adjusted width */}
             <DialogHeader>
               <DialogTitle>Filter Meal Plans</DialogTitle>
             </DialogHeader>
@@ -186,12 +189,13 @@ export default function NutritionPage() {
       </div>
 
       {/* Tabs for Meal Plans / Nutrition Calculator */}
-      <Tabs defaultValue="meal-plans" className="mb-8">
+      <Tabs defaultValue="meal-plans" className="mb-8"> {/* Ensure default matches one of the values */}
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="meal-plans">Meal Plans</TabsTrigger>
           <TabsTrigger value="calculator">Nutrition Calculator</TabsTrigger>
         </TabsList>
 
+        {/* Meal Plans Tab */}
         <TabsContent value="meal-plans">
           {/* Show currently applied filters as badges */}
           {(dietTypes.length > 0 || calorieRanges.length > 0 || goals.length > 0) && (
@@ -201,7 +205,7 @@ export default function NutritionPage() {
                   key={diet}
                   variant="outline"
                   className="cursor-pointer"
-                  onClick={() => toggleDietType(diet)}
+                  onClick={() => toggleDietType(diet)} // Allow removing by clicking badge
                 >
                   {diet} ×
                 </Badge>
@@ -238,13 +242,11 @@ export default function NutritionPage() {
           />
         </TabsContent>
 
+        {/* Calculator Tab */}
         <TabsContent value="calculator">
-          {/* Insert your NutritionCalculator or other UI here */}
-          <div className="p-4 border rounded-md mt-4">
-            <h2 className="text-xl font-bold mb-2">Nutrition Calculator</h2>
-            <p className="text-sm text-muted-foreground">
-              Placeholder content. Insert your calculator component here.
-            </p>
+          {/* 2. REPLACE PLACEHOLDER WITH YOUR COMPONENT */}
+          <div className="mt-4"> {/* Optional: Add margin-top for spacing */}
+            <NutritionCalculator />
           </div>
         </TabsContent>
       </Tabs>
