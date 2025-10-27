@@ -3,7 +3,8 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+// *** Import useEffect ***
+import { useState, useTransition, useEffect } from "react";
 import {
   ArrowLeftCircle,
   CalendarDays,
@@ -18,159 +19,31 @@ import {
   Bookmark,
   BookmarkCheck,
   Info,
-  Flame, // Added Flame icon
+  Flame,
+  Loader2,
 } from "lucide-react";
-import { toast } from "@/components/ui/use-toast"; // Using Shadcn's toast
+import { toast } from "sonner";
 
+// UI Components
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter // Added CardFooter
-} from "@/components/ui/card";
+} from "@/components/ui/card"; // Removed CardFooter import as it's not used here directly
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Added AlertTitle
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 
-// --- Mock Data (Should match meal-plans-list.tsx and include details) ---
-const mockMealPlanDetails: Record<string, any> = {
-  '1': {
-    id: "1",
-    title: "High Protein Meal Plan",
-    description: "Designed for muscle building and strength gain. Focuses on lean proteins, complex carbs, and healthy fats.",
-    category: "Muscle Building",
-    difficulty: "Intermediate",
-    prepTime: "Avg. 30 min/meal",
-    calories: 2500, // Use numbers for calculations
-    protein: 180,
-    carbs: 250,
-    fat: 80,
-    fiber: 35,
-    image: "https://media.istockphoto.com/id/1295633127/photo/grilled-chicken-meat-and-fresh-vegetable-salad-of-tomato-avocado-lettuce-and-spinach-healthy.jpg?s=612x612&w=0&k=20&c=Qa3tiqUCO4VpVMQDXLXG47znCmHr_ZIdoynViJ8kW0E=",
-    dietType: "Omnivore",
-    duration: "7 Days",
-    servings: "1 Person",
-    dailyPlan: [ /* ... Full 7-day plan data from previous example ... */ ],
-    groceryList: [ /* ... Full grocery list data from previous example ... */ ],
-    tips: [ /* ... Tips data ... */ ],
-    benefits: [ /* ... Benefits data ... */ ],
-    // NOTE: Make sure to copy the full 'dailyPlan', 'groceryList', 'tips', 'benefits'
-    // arrays from the "Code 2" example in your previous message for this plan (ID 1).
-    // I've omitted them here for brevity but they are needed.
-  },
-  '2': {
-    id: "2",
-    title: "Vegetarian Weight Loss",
-    description: "A plant-based plan focused on whole foods to support healthy weight loss while maintaining energy and nutrition.",
-    category: "Weight Loss",
-    difficulty: "Beginner",
-    prepTime: "Avg. 20 min/meal",
-    calories: 1800,
-    protein: 100,
-    carbs: 180,
-    fat: 60,
-    fiber: 40,
-    image: "https://cdn.prod.website-files.com/63ed08484c069d0492f5b0bc/642c5de2f6aa2bd4c9abbe86_6406876a4676d1734a14a9a3_Bowl-of-vegetables-and-fruits-for-a-vegetarian-diet-vegetarian-weight-loss-plan.jpeg",
-    dietType: "Vegetarian",
-    duration: "7 Days",
-    servings: "1 Person",
-    dailyPlan: [ /* ... Full 7-day plan data from previous example ... */ ],
-    groceryList: [ /* ... Full grocery list data from previous example ... */ ],
-    tips: [ /* ... Tips data ... */ ],
-    benefits: [ /* ... Benefits data ... */ ],
-  },
-    '3': {
-    id: "3",
-    title: "Keto Meal Plan",
-    category: "Weight Loss",
-    difficulty: "Advanced",
-    prepTime: "Avg. 40 min/meal",
-    calories: 2000,
-    protein: 140,
-    carbs: 30, // Very low carb
-    fat: 155,
-    fiber: 20,
-    image: "https://hellomealsonme.com/blogs/wp-content/uploads/2024/02/7-Day-Keto-Friendly-Meal-Plan.jpg",
-    dietType: "Keto",
-    duration: "7 Days",
-    servings: "1 Person",
-    description: "High fat, moderate protein, very low carb plan designed to induce and maintain ketosis for effective fat burning.",
-    dailyPlan: [ /* ... Full 7-day plan data from previous example ... */ ],
-    groceryList: [ /* ... Full grocery list data from previous example ... */ ],
-    tips: [ /* ... Tips data ... */ ],
-    benefits: [ /* ... Benefits data ... */ ],
-  },
-  '4': {
-    id: "4",
-    title: "Vegan Performance",
-    category: "Performance",
-    difficulty: "Intermediate",
-    prepTime: "Avg. 35 min/meal",
-    calories: 2200,
-    protein: 120,
-    carbs: 280,
-    fat: 65,
-    fiber: 50,
-    image: "https://www.canfitpro.com/wp-content/uploads/2018/08/vegah-square_2.jpg",
-    dietType: "Vegan",
-    duration: "7 Days",
-    servings: "1 Person",
-    description: "Plant-based fuel optimized for athletic performance with complete proteins and nutrient timing.",
-    dailyPlan: [ /* ... Full 7-day plan data from previous example ... */ ],
-    groceryList: [ /* ... Full grocery list data from previous example ... */ ],
-    tips: [ /* ... Tips data ... */ ],
-    benefits: [ /* ... Benefits data ... */ ],
-  },
-  '5': {
-    id: "5",
-    title: "Mediterranean Diet",
-    category: "Health",
-    difficulty: "Beginner",
-    prepTime: "Avg. 25 min/meal",
-    calories: 2100,
-    protein: 110,
-    carbs: 230,
-    fat: 85,
-    fiber: 38,
-    image: "https://media.sunbasket.com/2022/07/62abeaa1-3aff-4296-abce-e14c5507986c.webp",
-    dietType: "Mediterranean",
-    duration: "7 Days",
-    servings: "1 Person",
-    description: "Heart-healthy Mediterranean approach focusing on olive oil, fish, whole grains, and fresh produce.",
-    dailyPlan: [ /* ... Full 7-day plan data from previous example ... */ ],
-    groceryList: [ /* ... Full grocery list data from previous example ... */ ],
-    tips: [ /* ... Tips data ... */ ],
-    benefits: [ /* ... Benefits data ... */ ],
-  },
-  '6': {
-    id: "6",
-    title: "Paleo Meal Plan",
-    category: "Health",
-    difficulty: "Intermediate",
-    prepTime: "Avg. 35 min/meal",
-    calories: 2300,
-    protein: 150,
-    carbs: 160,
-    fat: 110,
-    fiber: 35,
-    image: "https://cdn-prod.medicalnewstoday.com/content/images/articles/324/324405/chicken-salad-in-bowl-top-down-view-with-olive-oil-in-jar.jpg",
-    dietType: "Paleo",
-    duration: "7 Days",
-    servings: "1 Person",
-    description: "Based on foods presumed to have been eaten by early humans - meat, fish, vegetables, fruits, nuts, and seeds.",
-    dailyPlan: [ /* ... Full 7-day plan data from previous example ... */ ],
-    groceryList: [ /* ... Full grocery list data from previous example ... */ ],
-    tips: [ /* ... Tips data ... */ ],
-    benefits: [ /* ... Benefits data ... */ ],
-  },
-};
-// --- End Mock Data ---
-
+// --- Import our new centralized data and actions ---
+import { getMealPlanById, MealPlan, Meal } from "@/lib/meal-plan-data";
+import { setActiveMealPlan } from "@/lib/nutrition-actions";
+import { auth } from "@/firebase-config"; // Keep this
+import { onAuthStateChanged } from "firebase/auth"; // Keep this
 
 // Helper to calculate macro percentage
 const calculatePercentage = (macroGrams: number, gramsPerCal: number, totalCalories: number) => {
@@ -182,34 +55,56 @@ export default function MealPlanDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const planId = params.id as string;
-  const [isSaved, setIsSaved] = useState(false); // Example state for saved status
-  const [activeDay, setActiveDay] = useState(0); // For daily meal tab
 
-  // Fetch plan details (using mock data here)
-  const plan = mockMealPlanDetails[planId] || null;
+  const [isSaved, setIsSaved] = useState(false);
+  const [activeDay, setActiveDay] = useState(0);
+  // *** Initialize state without listener ***
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  // Placeholder function for "Use Plan"
-  const handleUsePlan = () => {
-    // TODO: Implement actual logic:
-    // 1. Update user's active meal plan in Firestore/state management.
-    // 2. Navigate to the nutrition tracking tab or dashboard.
-    console.log(`Using plan ID: ${plan.id}, Title: ${plan.title}`);
-    toast({
-      title: "Plan Selected",
-      description: `${plan.title} has been set as your active plan.`,
+  // *** Use useEffect for the auth listener ***
+  useEffect(() => {
+    // onAuthStateChanged returns an unsubscribe function
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user); // Update state when auth changes
     });
-    // Optional: Redirect after setting the plan
-    // router.push('/profile?tab=nutrition');
+
+    // Cleanup function: Unsubscribe when the component unmounts
+    return () => unsubscribe();
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Fetch plan details (using our new function)
+  const plan = getMealPlanById(planId);
+
+  // --- Production-Level "Use Plan" Handler ---
+  const handleUsePlan = () => {
+    if (!isLoggedIn) {
+      toast.error("Please log in to use a meal plan.");
+      router.push("/login"); // Redirect to login if not logged in
+      return;
+    }
+    startTransition(async () => {
+      const result = await setActiveMealPlan(planId);
+      if (result.success) {
+        // Redirect to the nutrition tracking page
+        setTimeout(() => {
+          router.push("/profile?tab=nutrition");
+        }, 1000); // Wait 1 sec for toast to be read
+      }
+      // Error toasts handled inside the action
+    });
   };
 
   // Placeholder function for "Save Plan"
   const handleSave = () => {
+     if (!isLoggedIn) {
+      toast.error("Please log in to save a meal plan.");
+       router.push("/login"); // Redirect to login if not logged in
+      return;
+    }
     // TODO: Implement actual save/unsave logic in Firestore
     setIsSaved(!isSaved);
-    toast({
-      title: isSaved ? "Plan Unsaved" : "Plan Saved",
-      description: `${plan.title} ${isSaved ? 'removed from' : 'added to'} your saved plans.`,
-    });
+    toast.info(isSaved ? "Plan unsaved (demo)" : "Plan saved (demo)");
   };
 
   // Print handler
@@ -219,6 +114,7 @@ export default function MealPlanDetailsPage() {
 
   // Share handler
   const handleShare = async () => {
+    if (!plan) return;
     const shareData = {
       title: plan.title,
       text: plan.description,
@@ -227,15 +123,13 @@ export default function MealPlanDetailsPage() {
     try {
       if (navigator.share) {
         await navigator.share(shareData);
-        toast({ title: "Shared successfully!" });
       } else {
-        // Fallback for browsers without navigator.share
         await navigator.clipboard.writeText(window.location.href);
-        toast({ title: "Link Copied!", description: "Plan link copied to clipboard." });
+        toast.success("Link Copied!", { description: "Plan link copied to clipboard." });
       }
     } catch (err) {
       console.error("Error sharing:", err);
-      toast({ title: "Sharing Failed", description: "Could not share the plan.", variant: "destructive" });
+      toast.error("Sharing Failed", { description: "Could not share the plan." });
     }
   };
 
@@ -245,7 +139,6 @@ export default function MealPlanDetailsPage() {
   if (!plan) {
     return (
       <main className="container mx-auto py-8 px-4 md:px-6 text-center">
-         {/* Back Button */}
          <div className="mb-4 text-left">
            <Button variant="outline" size="sm" asChild>
              <Link href="/nutrition">← Back to Plans</Link>
@@ -291,12 +184,12 @@ export default function MealPlanDetailsPage() {
           {/* Image Section */}
           <div className="relative h-64 md:h-full min-h-[300px]">
             <Image
-              src={plan.image || "/placeholder.svg"} // Use placeholder if no image
+              src={plan.image || "/placeholder.svg"}
               alt={plan.title}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
-              priority // Load image faster
+              priority
             />
           </div>
 
@@ -305,7 +198,6 @@ export default function MealPlanDetailsPage() {
             <div> {/* Top content */}
               <div className="flex items-start justify-between mb-2">
                 <Badge className="mb-2 bg-primary/90 text-primary-foreground">{plan.dietType}</Badge>
-                 {/* Action Buttons */}
                 <div className="flex gap-1 print:hidden">
                   <Button variant="ghost" size="icon" onClick={handleSave} className="h-8 w-8" title={isSaved ? "Unsave Plan" : "Save Plan"}>
                     {isSaved ? <BookmarkCheck className="h-5 w-5 text-primary" /> : <Bookmark className="h-5 w-5" />}
@@ -321,31 +213,17 @@ export default function MealPlanDetailsPage() {
               <h1 className="text-3xl font-bold mb-2">{plan.title}</h1>
               <p className="text-muted-foreground mb-4">{plan.description}</p>
 
-              {/* Quick Info */}
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4 text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-primary/80" />
-                  <span>{plan.calories} kcal/day</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-primary/80" />
-                  <span>{plan.prepTime}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4 text-primary/80" />
-                  <span>{plan.duration}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ChefHat className="h-4 w-4 text-primary/80" />
-                  <span>{plan.difficulty}</span>
-                </div>
+                <div className="flex items-center gap-2"><Zap className="h-4 w-4 text-primary/80" /> <span>{plan.calories} kcal/day</span></div>
+                <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary/80" /> <span>{plan.prepTime}</span></div>
+                <div className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-primary/80" /> <span>{plan.duration}</span></div>
+                <div className="flex items-center gap-2"><ChefHat className="h-4 w-4 text-primary/80" /> <span>{plan.difficulty}</span></div>
                  <div className="flex items-center gap-2 col-span-2">
                     <Utensils className="h-4 w-4 text-primary/80" />
                     <span>P: {plan.protein}g • C: {plan.carbs}g • F: {plan.fat}g • Fiber: {plan.fiber}g</span>
                  </div>
               </div>
 
-               {/* Macro Breakdown Mini */}
               <div className="bg-muted/50 rounded-lg p-3 mb-4">
                  <h3 className="font-semibold mb-1.5 text-xs text-muted-foreground uppercase tracking-wider">Daily Macros</h3>
                  <div className="grid grid-cols-3 gap-2 text-center">
@@ -365,9 +243,12 @@ export default function MealPlanDetailsPage() {
                </div>
             </div>
 
-             {/* Use Plan Button */}
-            <Button size="lg" className="w-full mt-4 print:hidden" onClick={handleUsePlan}>
-              Use This Plan
+            <Button size="lg" className="w-full mt-4 print:hidden" onClick={handleUsePlan} disabled={isPending}>
+              {isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                "Use This Plan"
+              )}
             </Button>
           </div>
         </div>
@@ -390,7 +271,6 @@ export default function MealPlanDetailsPage() {
               <CardDescription>Everything you need to know about this meal plan</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Nutrition Breakdown */}
               <div>
                 <h3 className="font-semibold mb-3 text-lg">Nutrition Breakdown</h3>
                 <div className="space-y-3">
@@ -420,7 +300,6 @@ export default function MealPlanDetailsPage() {
 
               <Separator />
 
-              {/* Quick Facts */}
               <div>
                 <h3 className="font-semibold mb-3 text-lg">Quick Facts</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -429,7 +308,7 @@ export default function MealPlanDetailsPage() {
                     { icon: Clock, label: "Time Commitment", value: `${plan.prepTime} per meal` },
                     { icon: ChefHat, label: "Difficulty Level", value: `${plan.difficulty} cooking skills` },
                     { icon: CalendarDays, label: "Duration", value: `${plan.duration} complete plan` },
-                    { icon: Flame, label: "Fiber Intake", value: `${plan.fiber}g per day` }, // Added Fiber
+                    { icon: Flame, label: "Fiber Intake", value: `${plan.fiber}g per day` },
                   ].map((fact, index) => (
                     <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg border">
                       <div className="bg-primary/10 p-2 rounded-full mt-1">
@@ -444,7 +323,6 @@ export default function MealPlanDetailsPage() {
                 </div>
               </div>
 
-              {/* Sample Day Preview */}
               {plan.dailyPlan && plan.dailyPlan.length > 0 && plan.dailyPlan[0].meals?.length > 0 && (
                 <>
                   <Separator />
@@ -452,8 +330,7 @@ export default function MealPlanDetailsPage() {
                     <h3 className="font-semibold mb-3 text-lg">Sample Day Preview ({plan.dailyPlan[0].day})</h3>
                     <p className="text-sm text-muted-foreground mb-3">Here's a glimpse of what a typical day looks like:</p>
                     <div className="space-y-2">
-                       {/* Show first 3-4 meals */}
-                      {plan.dailyPlan[0].meals.slice(0, 4).map((meal: any, idx: number) => (
+                      {plan.dailyPlan[0].meals.slice(0, 4).map((meal: Meal, idx: number) => (
                         <div key={idx} className="flex justify-between items-center p-3 bg-muted/30 rounded-lg border">
                           <div>
                             <div className="font-medium text-sm">{meal.name}</div>
@@ -468,7 +345,6 @@ export default function MealPlanDetailsPage() {
                       {plan.dailyPlan[0].meals.length > 4 && (
                           <div className="text-center text-sm text-muted-foreground p-2">...and more</div>
                       )}
-                      {/* Button to switch to Daily Meals tab */}
                       <Button variant="outline" className="w-full" onClick={() => (document.querySelector('button[data-radix-collection-item][value="meals"]') as HTMLElement)?.click()}>
                         View Full Week Plan
                       </Button>
@@ -484,12 +360,11 @@ export default function MealPlanDetailsPage() {
         <TabsContent value="meals" className="space-y-4 mt-4">
           {plan.dailyPlan && plan.dailyPlan.length > 0 ? (
             <>
-              {/* Day Selector */}
               <Card className="print:hidden">
                 <CardContent className="pt-6">
                    <h3 className="text-sm font-medium text-muted-foreground mb-2 text-center md:text-left">Select Day:</h3>
                   <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted">
-                    {plan.dailyPlan.map((dayData: any, index: number) => (
+                    {plan.dailyPlan.map((dayData, index: number) => (
                       <Button
                         key={index}
                         variant={activeDay === index ? "default" : "outline"}
@@ -504,7 +379,6 @@ export default function MealPlanDetailsPage() {
                 </CardContent>
               </Card>
 
-              {/* Selected Day's Meals */}
               <Card>
                 <CardHeader>
                   <CardTitle>{plan.dailyPlan[activeDay].day}'s Meal Schedule</CardTitle>
@@ -512,7 +386,7 @@ export default function MealPlanDetailsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {plan.dailyPlan[activeDay].meals.map((meal: any, index: number) => (
+                    {plan.dailyPlan[activeDay].meals.map((meal, index: number) => (
                       <div key={index} className="border rounded-lg p-4 hover:bg-muted/30 transition-colors">
                         <div className="flex justify-between items-start mb-2 gap-4">
                           <div className="flex-1">
@@ -527,23 +401,25 @@ export default function MealPlanDetailsPage() {
                             <div className="text-xs text-muted-foreground">P: {meal.protein}g</div>
                           </div>
                         </div>
-                         {/* Optional: Add more details if available in your data */}
-                         {/* <p className="text-xs text-muted-foreground mt-1">
-                            Carbs: {meal.carbs}g • Fat: {meal.fat}g
-                         </p> */}
+                         <p className="text-xs text-muted-foreground mt-1">
+                            Carbs: {meal.carbs || 'N/A'}g • Fat: {meal.fat || 'N/A'}g
+                         </p>
                       </div>
                     ))}
                   </div>
 
-                  {/* Daily Totals Calculation */}
                   <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
                      <h3 className="font-semibold mb-3 text-lg">Daily Totals for {plan.dailyPlan[activeDay].day}</h3>
                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        {(['calories', 'protein'] as const).map(macro => {
+                        {(['calories', 'protein', 'carbs', 'fat'] as const).map(macro => {
                           const total = plan.dailyPlan[activeDay].meals.reduce((sum: number, meal: any) => sum + (meal[macro] || 0), 0);
-                          const target = plan[macro]; // Get target from main plan data
+                          const target = plan[macro as keyof typeof plan];
                           const unit = macro === 'calories' ? 'kcal' : 'g';
-                          const colorClass = macro === 'protein' ? 'text-green-600' : 'text-foreground';
+                          let colorClass = 'text-foreground';
+                          if (macro === 'protein') colorClass = 'text-green-600';
+                          if (macro === 'carbs') colorClass = 'text-blue-600';
+                          if (macro === 'fat') colorClass = 'text-orange-600';
+
                           return (
                             <div key={macro}>
                               <div className="text-xs text-muted-foreground capitalize">{macro}</div>
@@ -554,7 +430,6 @@ export default function MealPlanDetailsPage() {
                             </div>
                           );
                         })}
-                         {/* You can add Carb/Fat totals similarly if needed */}
                      </div>
                    </div>
                 </CardContent>
@@ -585,7 +460,6 @@ export default function MealPlanDetailsPage() {
                     Print List
                   </Button>
                 </div>
-                 {/* Title for printing */}
                  <div className="hidden print:block text-center mb-4">
                     <h1 className="text-2xl font-bold">{plan.title} - Grocery List</h1>
                  </div>
@@ -600,18 +474,15 @@ export default function MealPlanDetailsPage() {
                 </Alert>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                  {plan.groceryList.map((category: any, index: number) => (
+                  {plan.groceryList.map((category, index: number) => (
                     <div key={index} className="border-b pb-4 mb-4 md:border-none md:pb-0 md:mb-0">
                       <h3 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-                        {/* Simple category indicator */}
                         {category.category}
                       </h3>
                       <ul className="space-y-2">
                         {category.items.map((item: string, idx: number) => (
                           <li key={idx} className="flex items-start gap-2 text-sm">
-                             {/* Basic checkbox for print */}
                              <span className="hidden print:inline-block border border-gray-400 w-4 h-4 mt-0.5 mr-2 flex-shrink-0"></span>
-                            {/* Check icon for web view */}
                              <Check className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0 print:hidden" />
                             <span>{item}</span>
                           </li>
@@ -635,7 +506,6 @@ export default function MealPlanDetailsPage() {
         {/* --- Tips & Benefits Tab --- */}
         <TabsContent value="tips" className="space-y-4 mt-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Tips Card */}
             {plan.tips && plan.tips.length > 0 && (
               <Card>
                 <CardHeader>
@@ -657,7 +527,6 @@ export default function MealPlanDetailsPage() {
               </Card>
             )}
 
-            {/* Benefits Card */}
             {plan.benefits && plan.benefits.length > 0 && (
               <Card>
                 <CardHeader>
@@ -680,7 +549,6 @@ export default function MealPlanDetailsPage() {
             )}
           </div>
 
-          {/* Additional Information */}
           <Card>
             <CardHeader>
               <CardTitle>Important Information</CardTitle>
@@ -700,13 +568,6 @@ export default function MealPlanDetailsPage() {
                   Before starting any new nutrition plan, especially if you have medical conditions or specific health goals, consult with a registered dietitian or healthcare provider.
                 </AlertDescription>
               </Alert>
-               <Alert variant="default" className="border-green-500/50 dark:border-green-500/30">
-                 <Info className="h-4 w-4 text-green-600 dark:text-green-400"/>
-                  <AlertTitle className="text-green-700 dark:text-green-300">Flexibility</AlertTitle>
-                <AlertDescription>
-                  Feel free to swap similar foods within the same category (e.g., different vegetables, lean proteins) to maintain variety and accommodate your tastes.
-                </AlertDescription>
-              </Alert>
             </CardContent>
           </Card>
         </TabsContent>
@@ -724,14 +585,20 @@ export default function MealPlanDetailsPage() {
                  {isSaved ? <BookmarkCheck className="h-4 w-4 mr-2" /> : <Bookmark className="h-4 w-4 mr-2" />}
                  {isSaved ? "Saved" : "Save Plan"}
                </Button>
-               <Button onClick={handleUsePlan}>
-                 Use This Plan
+               <Button onClick={handleUsePlan} disabled={isPending}>
+                 {isPending ? (
+                   <>
+                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                     Applying...
+                   </>
+                 ) : (
+                   "Use This Plan"
+                 )}
                </Button>
              </div>
            </div>
          </CardContent>
        </Card>
-
     </main>
   );
 }

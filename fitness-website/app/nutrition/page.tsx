@@ -1,20 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Filter } from "lucide-react";
+import { Filter, Search } from "lucide-react"; // Import Search icon
+import { Toaster } from "sonner"; // Import the Toaster for feedback
 
+// UI Components
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox"; // Use Checkbox for filters
+import { Label } from "@/components/ui/label"; // Use Label with Checkbox
 
-// Import your MealPlansList component
-import MealPlansList from "@/components/meal-plans-list"; // Ensure this path is correct
-
-// 1. IMPORT THE NUTRITION CALCULATOR COMPONENT
-import NutritionCalculator from "@/components/NutritionCalculator"; // Adjust path if needed
+// Import your components
+import MealPlansList from "@/components/meal-plans-list";
+import NutritionCalculator from "@/components/NutritionCalculator";
 
 export default function NutritionPage() {
   // States for search & filters
@@ -24,31 +26,20 @@ export default function NutritionPage() {
   const [goals, setGoals] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Handlers (keep these as they are)
+  // Handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
-  const toggleDietType = (type: string) => {
-    setDietTypes((prev) =>
-      prev.includes(type) ? prev.filter((item) => item !== type) : [...prev, type]
-    );
-  };
-
-  const toggleCalorieRange = (range: string) => {
-    setCalorieRanges((prev) =>
-      prev.includes(range) ? prev.filter((item) => item !== range) : [...prev, range]
-    );
-  };
-
-  const toggleGoal = (goal: string) => {
-    setGoals((prev) =>
-      prev.includes(goal) ? prev.filter((item) => item !== goal) : [...prev, goal]
+  const toggleFilter = (filterStateSetter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
+    filterStateSetter((prev) =>
+      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
     );
   };
 
   const applyFilters = () => {
     setIsFilterOpen(false);
+    // Filtering happens automatically in MealPlansList based on props
   };
 
   const resetFilters = () => {
@@ -57,130 +48,122 @@ export default function NutritionPage() {
     setGoals([]);
   };
 
+  // Define filter options for easier mapping
+  const dietOptions = ["Vegetarian", "Vegan", "Keto", "Paleo", "Mediterranean", "Omnivore"];
+  const calorieOptions = ["Under 1500", "1500-2000", "2000-2500", "Over 2500"];
+  const goalOptions = ["Weight Loss", "Muscle Building", "Performance", "Health", "Maintenance"];
+
   return (
     <main className="container mx-auto py-8 px-4 md:px-6">
+      {/* --- Add Sonner Toaster --- */}
+      <Toaster position="top-right" richColors />
+
       {/* Page Heading */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Nutrition Plans</h1>
-        <p className="text-muted-foreground">Fuel your body with the right nutrition</p>
+        <h1 className="text-3xl font-bold mb-2">Nutrition Center</h1>
+        <p className="text-muted-foreground">Discover meal plans or calculate your needs</p>
       </div>
 
       {/* Search & Filter Row */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        {/* Search Box */}
-        <div className="relative w-full md:w-164"> {/* Increased width */}
+        <div className="relative w-full md:flex-grow max-w-lg">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search meal plans..."
-            className="pl-8" // Added padding for icon
+            placeholder="Search meal plans by name..."
+            className="pl-8 w-full"
             value={searchTerm}
             onChange={handleSearchChange}
           />
-          {/* Search Icon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" // Centered icon
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
         </div>
 
-        {/* Filter Button (Dialog Trigger) */}
+        {/* Filter Button */}
         <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Filter className="h-4 w-4" />
+            <Button variant="outline" className="w-full md:w-auto">
+              <Filter className="h-4 w-4 mr-2" />
+              Filters
+              {/* Show count of active filters */}
+              {(dietTypes.length + calorieRanges.length + goals.length > 0) && (
+                <Badge variant="secondary" className="ml-2 rounded-full px-1.5 py-0.5 text-xs">
+                  {dietTypes.length + calorieRanges.length + goals.length}
+                </Badge>
+              )}
             </Button>
           </DialogTrigger>
 
-          {/* Filter Dialog */}
-          <DialogContent className="max-w-4xl sm:max-w-4xl"> {/* Adjusted width */}
+          {/* Filter Dialog Content */}
+          <DialogContent className="max-w-3xl sm:max-w-4xl">
             <DialogHeader>
               <DialogTitle>Filter Meal Plans</DialogTitle>
             </DialogHeader>
-
-            {/* 3-Column Layout for Filter Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
               {/* Dietary Preferences */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Dietary Preferences</CardTitle>
-                  <CardDescription>Filter by diet type</CardDescription>
+              <Card className="border-none shadow-none">
+                <CardHeader className="p-4">
+                  <CardTitle className="text-base">Dietary Preferences</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  {["Vegetarian", "Vegan", "Keto", "Paleo", "Mediterranean", "Omnivore"].map((diet) => (
-                    <label
-                      key={diet}
-                      className="flex items-center gap-2 p-2 border rounded-md cursor-pointer hover:bg-accent/5"
-                    >
-                      <input
-                        type="checkbox"
+                <CardContent className="space-y-3 p-4 pt-0">
+                  {dietOptions.map((diet) => (
+                    <div key={diet} className="flex items-center space-x-2">
+                       <Checkbox
+                        id={`diet-${diet}`}
                         checked={dietTypes.includes(diet)}
-                        onChange={() => toggleDietType(diet)}
-                        className="h-4 w-4"
+                        onCheckedChange={() => toggleFilter(setDietTypes, diet)}
                       />
-                      <span>{diet}</span>
-                    </label>
+                      <Label htmlFor={`diet-${diet}`} className="text-sm font-normal cursor-pointer">
+                        {diet}
+                      </Label>
+                    </div>
                   ))}
                 </CardContent>
               </Card>
 
               {/* Calorie Range */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Calorie Range</CardTitle>
-                  <CardDescription>Filter by daily calories</CardDescription>
+              <Card className="border-none shadow-none">
+                 <CardHeader className="p-4">
+                  <CardTitle className="text-base">Calorie Range (per day)</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  {["Under 1500", "1500-2000", "2000-2500", "Over 2500"].map((range) => (
-                    <label
-                      key={range}
-                      className="flex items-center gap-2 p-2 border rounded-md cursor-pointer hover:bg-accent/5"
-                    >
-                      <input
-                        type="checkbox"
+                <CardContent className="space-y-3 p-4 pt-0">
+                  {calorieOptions.map((range) => (
+                     <div key={range} className="flex items-center space-x-2">
+                       <Checkbox
+                        id={`cal-${range}`}
                         checked={calorieRanges.includes(range)}
-                        onChange={() => toggleCalorieRange(range)}
-                        className="h-4 w-4"
+                        onCheckedChange={() => toggleFilter(setCalorieRanges, range)}
                       />
-                      <span>{range}</span>
-                    </label>
+                      <Label htmlFor={`cal-${range}`} className="text-sm font-normal cursor-pointer">
+                        {range}
+                      </Label>
+                    </div>
                   ))}
                 </CardContent>
               </Card>
 
               {/* Goals */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Goals</CardTitle>
-                  <CardDescription>Filter by fitness goal</CardDescription>
+              <Card className="border-none shadow-none">
+                <CardHeader className="p-4">
+                  <CardTitle className="text-base">Primary Goal</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  {["Weight Loss", "Muscle Building", "Performance", "Health", "Maintenance"].map((goal) => (
-                    <label
-                      key={goal}
-                      className="flex items-center gap-2 p-2 border rounded-md cursor-pointer hover:bg-accent/5"
-                    >
-                      <input
-                        type="checkbox"
+                <CardContent className="space-y-3 p-4 pt-0">
+                  {goalOptions.map((goal) => (
+                    <div key={goal} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`goal-${goal}`}
                         checked={goals.includes(goal)}
-                        onChange={() => toggleGoal(goal)}
-                        className="h-4 w-4"
+                        onCheckedChange={() => toggleFilter(setGoals, goal)}
                       />
-                      <span>{goal}</span>
-                    </label>
+                      <Label htmlFor={`goal-${goal}`} className="text-sm font-normal cursor-pointer">
+                        {goal}
+                      </Label>
+                    </div>
                   ))}
                 </CardContent>
               </Card>
             </div>
-
-            {/* Dialog Buttons */}
-            <div className="flex justify-between mt-4">
-              <Button variant="outline" onClick={resetFilters}>
-                Reset All
+            <div className="flex justify-between mt-4 border-t pt-4">
+              <Button variant="ghost" onClick={resetFilters}>
+                Reset Filters
               </Button>
               <Button onClick={applyFilters}>Apply Filters</Button>
             </div>
@@ -189,51 +172,38 @@ export default function NutritionPage() {
       </div>
 
       {/* Tabs for Meal Plans / Nutrition Calculator */}
-      <Tabs defaultValue="meal-plans" className="mb-8"> {/* Ensure default matches one of the values */}
+      <Tabs defaultValue="meal-plans" className="mb-8">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="meal-plans">Meal Plans</TabsTrigger>
           <TabsTrigger value="calculator">Nutrition Calculator</TabsTrigger>
         </TabsList>
 
-        {/* Meal Plans Tab */}
         <TabsContent value="meal-plans">
-          {/* Show currently applied filters as badges */}
-          {(dietTypes.length > 0 || calorieRanges.length > 0 || goals.length > 0) && (
-            <div className="flex flex-wrap gap-2 mt-4">
+          {/* Show currently applied filters */}
+          {(dietTypes.length + calorieRanges.length + goals.length > 0) && (
+            <div className="flex flex-wrap gap-2 mt-4 mb-4 items-center">
+              <span className="text-sm font-medium mr-2">Active Filters:</span>
               {dietTypes.map((diet) => (
-                <Badge
-                  key={diet}
-                  variant="outline"
-                  className="cursor-pointer"
-                  onClick={() => toggleDietType(diet)} // Allow removing by clicking badge
-                >
-                  {diet} ×
+                <Badge key={diet} variant="secondary" className="cursor-pointer" onClick={() => toggleFilter(setDietTypes, diet)}>
+                  {diet} <span className="ml-1 text-muted-foreground">×</span>
                 </Badge>
               ))}
               {calorieRanges.map((range) => (
-                <Badge
-                  key={range}
-                  variant="outline"
-                  className="cursor-pointer"
-                  onClick={() => toggleCalorieRange(range)}
-                >
-                  {range} ×
+                <Badge key={range} variant="secondary" className="cursor-pointer" onClick={() => toggleFilter(setCalorieRanges, range)}>
+                  {range} <span className="ml-1 text-muted-foreground">×</span>
                 </Badge>
               ))}
               {goals.map((goal) => (
-                <Badge
-                  key={goal}
-                  variant="outline"
-                  className="cursor-pointer"
-                  onClick={() => toggleGoal(goal)}
-                >
-                  {goal} ×
+                <Badge key={goal} variant="secondary" className="cursor-pointer" onClick={() => toggleFilter(setGoals, goal)}>
+                  {goal} <span className="ml-1 text-muted-foreground">×</span>
                 </Badge>
               ))}
+              <Button variant="ghost" size="sm" onClick={resetFilters} className="ml-auto h-auto p-1 text-xs text-muted-foreground hover:text-foreground">
+                Clear All
+              </Button>
             </div>
           )}
 
-          {/* Meal Plans List */}
           <MealPlansList
             searchTerm={searchTerm}
             dietTypes={dietTypes}
@@ -242,10 +212,8 @@ export default function NutritionPage() {
           />
         </TabsContent>
 
-        {/* Calculator Tab */}
         <TabsContent value="calculator">
-          {/* 2. REPLACE PLACEHOLDER WITH YOUR COMPONENT */}
-          <div className="mt-4"> {/* Optional: Add margin-top for spacing */}
+          <div className="mt-4">
             <NutritionCalculator />
           </div>
         </TabsContent>
