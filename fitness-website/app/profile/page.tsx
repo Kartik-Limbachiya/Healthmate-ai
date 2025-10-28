@@ -47,14 +47,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="container mx-auto py-8 px-4 md:px-6">
-      <h1 className="text-3xl font-bold mb-8">My Profile</h1>
-      <Tabs defaultValue="dashboard" className="space-y-8">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="workouts">Workouts</TabsTrigger>
-          <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+    <main className="container mx-auto py-6 sm:py-8 px-4 md:px-6">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">My Profile</h1>
+      <Tabs defaultValue="dashboard" className="space-y-6 sm:space-y-8">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1">
+          <TabsTrigger value="dashboard" className="text-xs sm:text-sm">Dashboard</TabsTrigger>
+          <TabsTrigger value="workouts" className="text-xs sm:text-sm">Workouts</TabsTrigger>
+          <TabsTrigger value="nutrition" className="text-xs sm:text-sm">Nutrition</TabsTrigger>
+          <TabsTrigger value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard">
           <ProfileDashboard userData={userData} />

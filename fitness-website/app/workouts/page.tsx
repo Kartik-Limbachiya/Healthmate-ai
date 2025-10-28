@@ -404,52 +404,52 @@ export default function WorkoutsPage() {
   };
 
   return (
-    <main className="container mx-auto py-8 px-4 md:px-6">
+    <main className="container mx-auto py-6 sm:py-8 px-4 md:px-6">
       {/* AI ANALYZER SECTION */}
-      <div className="mb-12">
-        <h2 className="text-3xl font-bold mb-4 text-center">AI Analyzers</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="mb-8 sm:mb-12">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-center">AI Analyzers</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <Card className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-            <CardHeader>
-              <CardTitle>Live Squat Analyzer</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">Live Squat Analyzer</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="mb-4">
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <p className="mb-4 text-sm sm:text-base">
                 Get real-time feedback on your squat form using our AI.
               </p>
               <Link href="/workouts/LiveWorkout">
-                <Button variant="secondary">Start Live Squat</Button>
+                <Button variant="secondary" className="w-full sm:w-auto">Start Live Squat</Button>
               </Link>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
-            <CardHeader>
-              <CardTitle>Live Pushup Counter</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">Live Pushup Counter</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="mb-4">
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <p className="mb-4 text-sm sm:text-base">
                 Count your reps and check your form with our AI pushup analyzer.
               </p>
               {/* FIXED: Correct path to LivePushup */}
               <Link href="/workouts/LiveWorkout/LivePushup">
-                <Button variant="secondary">Start Live Pushup</Button>
+                <Button variant="secondary" className="w-full sm:w-auto">Start Live Pushup</Button>
               </Link>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 sm:mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Workouts Library</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Workouts Library</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Find the perfect workout for your fitness goals
           </p>
         </div>
 
         <div className="flex w-full md:w-auto gap-2">
-          <div className="relative w-full md:w-64">
+          <div className="relative flex-1 md:flex-initial md:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -459,30 +459,30 @@ export default function WorkoutsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="flex-shrink-0">
             <Filter className="h-4 w-4" />
             <span className="sr-only">Filter</span>
           </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="all" className="mb-8">
-        <TabsList className="grid grid-cols-5 md:w-auto w-full">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="strength">Strength</TabsTrigger>
-          <TabsTrigger value="cardio">Cardio</TabsTrigger>
-          <TabsTrigger value="flexibility">Flexibility</TabsTrigger>
-          <TabsTrigger value="hiit">HIIT</TabsTrigger>
+      <Tabs defaultValue="all" className="mb-6 sm:mb-8">
+        <TabsList className="grid grid-cols-5 w-full md:w-auto overflow-x-auto">
+          <TabsTrigger value="all" className="text-xs sm:text-sm">All</TabsTrigger>
+          <TabsTrigger value="strength" className="text-xs sm:text-sm">Strength</TabsTrigger>
+          <TabsTrigger value="cardio" className="text-xs sm:text-sm">Cardio</TabsTrigger>
+          <TabsTrigger value="flexibility" className="text-xs sm:text-sm">Flexibility</TabsTrigger>
+          <TabsTrigger value="hiit" className="text-xs sm:text-sm">HIIT</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-6">
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Difficulty Level</CardTitle>
-                <CardDescription>Filter workouts by difficulty</CardDescription>
+              <CardHeader className="pb-2 p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Difficulty Level</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Filter workouts by difficulty</CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-3 gap-2">
+              <CardContent className="grid grid-cols-3 gap-2 p-4 sm:p-6 pt-0">
                 {["Beginner", "Intermediate", "Advanced"].map((diff) => (
                   <Button
                     key={diff}
@@ -497,11 +497,11 @@ export default function WorkoutsPage() {
             </Card>
 
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Duration</CardTitle>
-                <CardDescription>Filter by workout length</CardDescription>
+              <CardHeader className="pb-2 p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Duration</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Filter by workout length</CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-3 gap-2">
+              <CardContent className="grid grid-cols-3 gap-2 p-4 sm:p-6 pt-0">
                 {["< 15 min", "15-30 min", "30+ min"].map((dur) => (
                   <Button
                     key={dur}
@@ -516,11 +516,11 @@ export default function WorkoutsPage() {
             </Card>
 
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Equipment</CardTitle>
-                <CardDescription>Filter by available equipment</CardDescription>
+              <CardHeader className="pb-2 p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Equipment</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Filter by available equipment</CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-3 gap-2">
+              <CardContent className="grid grid-cols-3 gap-2 p-4 sm:p-6 pt-0">
                 {["No Equipment", "Minimal", "Full Gym"].map((eq) => (
                   <Button
                     key={eq}

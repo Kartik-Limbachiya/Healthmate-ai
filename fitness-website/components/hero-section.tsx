@@ -35,48 +35,49 @@ export default function HeroSection() {
         />
       </div>
 
-      <div className="container mx-auto px-4 py-24 md:py-32 relative z-10">
-        <div className="flex flex-col md:flex-row items-center">
-          <div className="md:w-1/2 mb-10 md:mb-0">
+      <div className="container mx-auto px-4 py-12 sm:py-16 md:py-24 lg:py-32 relative z-10">
+        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+          <div className="w-full md:w-1/2 mb-6 md:mb-0">
             <div
-              className="inline-flex items-center bg-primary text-white px-4 py-1 rounded-full text-sm font-medium mb-6 animate-bounce"
+              className="inline-flex items-center bg-primary text-white px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6 animate-bounce"
               style={{ animationDuration: "3s" }}
             >
               <HeartbeatIcon className="mr-2" size={16} color="white" beatsPerMinute={80} />
-              Your all-in-one health partner
+              <span className="hidden sm:inline">Your all-in-one health partner</span>
+              <span className="sm:hidden">Your health partner</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 relative">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 relative leading-tight">
               <span className="relative inline-block after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-primary after:transform after:scale-x-0 after:animate-expand">
                 Achieve
               </span>{" "}
               Your Health Goals With Expert Guidance
             </h1>
 
-            <p className="text-lg md:text-xl mb-8 max-w-lg text-gray-300">
+            <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-lg text-gray-300">
               Personalized workout plans, nutrition advice, and progress tracking all in one place. Start your health
               journey today.
             </p>
 
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center transform transition-transform hover:scale-105">
-                <AnimatedStat value={1000} suffix="+" className="text-2xl font-bold text-primary" />
-                <p className="text-xs mt-1">Active Users</p>
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center transform transition-transform hover:scale-105">
+                <AnimatedStat value={1000} suffix="+" className="text-lg sm:text-2xl font-bold text-primary" />
+                <p className="text-[10px] sm:text-xs mt-1">Active Users</p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center transform transition-transform hover:scale-105">
-                <AnimatedStat value={87} suffix="%" className="text-2xl font-bold text-primary" />
-                <p className="text-xs mt-1">Success Rate</p>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center transform transition-transform hover:scale-105">
+                <AnimatedStat value={87} suffix="%" className="text-lg sm:text-2xl font-bold text-primary" />
+                <p className="text-[10px] sm:text-xs mt-1">Success Rate</p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center transform transition-transform hover:scale-105">
-                <AnimatedStat value={30} prefix="~" suffix=" Days" className="text-2xl font-bold text-primary" />
-                <p className="text-xs mt-1">See Results</p>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center transform transition-transform hover:scale-105">
+                <AnimatedStat value={30} prefix="~" suffix=" Days" className="text-lg sm:text-2xl font-bold text-primary" />
+                <p className="text-[10px] sm:text-xs mt-1">See Results</p>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Button
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-white group relative overflow-hidden"
+                className="bg-primary hover:bg-primary/90 text-white group relative overflow-hidden w-full sm:w-auto"
                 asChild
               >
                 <Link href="/signup">
@@ -84,8 +85,8 @@ export default function HeroSection() {
                   <span className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 group" asChild>
-                <Link href="/workouts" className="flex items-center">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 group w-full sm:w-auto" asChild>
+                <Link href="/workouts" className="flex items-center justify-center">
                   Explore Workouts
                   <svg
                     className="ml-2 h-4 w-4 transform transition-transform group-hover:translate-x-1"
@@ -101,27 +102,27 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="md:w-1/2 flex justify-center">
-            <div className="relative w-full max-w-md aspect-[3/4] rounded-lg overflow-hidden shadow-2xl transform transition-all hover:scale-105 duration-700">
+          <div className="w-full md:w-1/2 flex justify-center">
+            <div className="relative w-full max-w-sm sm:max-w-md aspect-[3/4] rounded-lg overflow-hidden shadow-2xl transform transition-all hover:scale-105 duration-700">
               <div className="absolute inset-0 bg-primary/20 z-10 rounded-lg"></div>
-              <div className="absolute -bottom-2 -right-2 w-32 h-32 bg-accent rounded-full opacity-70 animate-pulse"></div>
+              <div className="absolute -bottom-2 -right-2 w-24 sm:w-32 h-24 sm:h-32 bg-accent rounded-full opacity-70 animate-pulse"></div>
               <div
-                className="absolute -top-2 -left-2 w-24 h-24 bg-primary rounded-full opacity-70 animate-pulse"
+                className="absolute -top-2 -left-2 w-16 sm:w-24 h-16 sm:h-24 bg-primary rounded-full opacity-70 animate-pulse"
                 style={{ animationDuration: "4s" }}
               ></div>
               <Image src="https://i.postimg.cc/43pFYmmd/temp34.jpg" alt="Health trainer" fill className="object-cover" />
 
               {/* Animated stats overlay */}
-              <div className="absolute bottom-4 left-4 right-4 bg-black/50 backdrop-blur-sm rounded-lg p-3 z-20 transform transition-transform hover:scale-105">
+              <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 bg-black/50 backdrop-blur-sm rounded-lg p-2 sm:p-3 z-20 transform transition-transform hover:scale-105">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-xs text-gray-300">Daily Progress</p>
+                    <p className="text-[10px] sm:text-xs text-gray-300">Daily Progress</p>
                     <div className="flex items-center">
-                      <HeartbeatIcon className="mr-2" color="#FF9500" />
-                      <span className="text-primary font-bold">Excellent</span>
+                      <HeartbeatIcon className="mr-1 sm:mr-2" size={14} color="#FF9500" />
+                      <span className="text-primary font-bold text-xs sm:text-sm">Excellent</span>
                     </div>
                   </div>
-                  <div className="h-10 w-10">
+                  <div className="h-8 w-8 sm:h-10 sm:w-10">
                     <WaterWaveAnimation percentage={75} />
                   </div>
                 </div>

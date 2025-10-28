@@ -66,78 +66,83 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="container flex items-center justify-center min-h-[calc(100vh-4rem)] py-12">
+    <div className="container flex items-center justify-center min-h-[calc(100vh-4rem)] py-8 sm:py-12 px-4">
       <Card className="mx-auto max-w-md w-full border-2 border-primary/20">
-        <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-4">
-            <div className="bg-primary/10 p-3 rounded-full">
-              <Activity className="h-8 w-8 text-primary" />
+        <CardHeader className="space-y-1 p-4 sm:p-6">
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <div className="bg-primary/10 p-2 sm:p-3 rounded-full">
+              <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-center">
             Create an account
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-sm sm:text-base">
             Enter your information to get started with HealthMate
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First name</Label>
+              <Label htmlFor="firstName" className="text-sm sm:text-base">First name</Label>
               <Input
                 id="firstName"
                 placeholder="John"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                className="text-sm sm:text-base"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last name</Label>
+              <Label htmlFor="lastName" className="text-sm sm:text-base">Last name</Label>
               <Input
                 id="lastName"
                 placeholder="Doe"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                className="text-sm sm:text-base"
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-sm sm:text-base">Email</Label>
             <Input
               id="email"
               type="email"
               placeholder="john.doe@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="text-sm sm:text-base"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-sm sm:text-base">Password</Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="text-sm sm:text-base"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword" className="text-sm sm:text-base">Confirm Password</Label>
             <Input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              className="text-sm sm:text-base"
             />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-xs sm:text-sm">{error}</p>}
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <Button onClick={handleSignup} className="w-full bg-primary hover:bg-primary/90">
+        <CardFooter className="flex flex-col space-y-4 p-4 sm:p-6 pt-0">
+          <Button onClick={handleSignup} className="w-full bg-primary hover:bg-primary/90 text-sm sm:text-base">
             Create Account
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          <div className="text-center text-sm">
+          <div className="text-center text-xs sm:text-sm">
             Already have an account?{" "}
             <Link href="/login" className="text-primary hover:underline">
               Sign in

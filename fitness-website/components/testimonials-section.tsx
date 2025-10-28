@@ -66,7 +66,7 @@ export default function TestimonialsSection() {
   }, [])
 
   return (
-    <section className="py-16 px-4 md:px-6 bg-gray-50 dark:bg-secondary/50 relative overflow-hidden">
+    <section className="py-12 sm:py-16 px-4 md:px-6 bg-gray-50 dark:bg-secondary/50 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div
@@ -80,21 +80,21 @@ export default function TestimonialsSection() {
       </div>
 
       <div className="container mx-auto relative z-10" ref={containerRef}>
-        <div className="flex items-center justify-center mb-12">
-          <HeartbeatIcon size={24} color="#FF9500" className="mr-3" />
-          <h2 className="text-3xl font-bold text-center">What Our Members Say</h2>
+        <div className="flex items-center justify-center mb-8 sm:mb-12">
+          <HeartbeatIcon size={20} color="#FF9500" className="mr-2 sm:mr-3" />
+          <h2 className="text-2xl sm:text-3xl font-bold text-center">What Our Members Say</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {testimonials.map((testimonial, index) => (
             <Card
               key={testimonial.id}
               className="testimonial-card border-none shadow-md hover:shadow-lg transition-shadow opacity-0"
               style={{ transitionDelay: `${index * 150}ms` }}
             >
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-4">
-                  <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-primary">
+              <CardHeader className="pb-2 p-4 sm:p-6">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-full overflow-hidden border-2 border-primary flex-shrink-0">
                     <Image
                       src={testimonial.avatar || "/placeholder.svg"}
                       alt={testimonial.name}
@@ -103,15 +103,15 @@ export default function TestimonialsSection() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-semibold">{testimonial.name}</h3>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    <h3 className="font-semibold text-sm sm:text-base">{testimonial.name}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</p>
                   </div>
                 </div>
                 <div className="flex mt-2">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-4 w-4 ${
+                      className={`h-3 w-3 sm:h-4 sm:w-4 ${
                         i < testimonial.rating ? "text-primary fill-primary" : "text-gray-300"
                       } ${i < testimonial.rating ? "animate-star-pulse" : ""}`}
                       style={{ animationDelay: `${i * 200}ms` }}
@@ -119,11 +119,11 @@ export default function TestimonialsSection() {
                   ))}
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 sm:p-6 pt-0">
                 <div className="relative">
-                  <div className="absolute -top-4 -left-2 text-primary text-4xl opacity-20">"</div>
-                  <p className="text-gray-600 dark:text-gray-300 relative z-10">{testimonial.content}</p>
-                  <div className="absolute -bottom-4 -right-2 text-primary text-4xl opacity-20">"</div>
+                  <div className="absolute -top-4 -left-2 text-primary text-3xl sm:text-4xl opacity-20">"</div>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 relative z-10">{testimonial.content}</p>
+                  <div className="absolute -bottom-4 -right-2 text-primary text-3xl sm:text-4xl opacity-20">"</div>
                 </div>
               </CardContent>
             </Card>

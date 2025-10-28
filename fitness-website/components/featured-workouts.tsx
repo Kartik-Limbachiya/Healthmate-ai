@@ -50,7 +50,7 @@ const featuredWorkouts = [
 
 export default function FeaturedWorkouts() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       {featuredWorkouts.map((workout, index) => (
         <Link href={`/workouts/${workout.id}`} key={workout.id} className="group">
           <Card
@@ -60,7 +60,7 @@ export default function FeaturedWorkouts() {
               animation: "fadeInUp 0.6s ease-out forwards",
             }}
           >
-            <div className="relative h-48 w-full overflow-hidden">
+            <div className="relative h-40 sm:h-48 w-full overflow-hidden">
               <Image
                 src={workout.image || "/placeholder.svg"}
                 alt={workout.title}
@@ -70,14 +70,14 @@ export default function FeaturedWorkouts() {
               <Badge className="absolute top-3 right-3 bg-primary">{workout.category}</Badge>
 
               {/* Animated overlay on hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                <p className="text-white text-sm font-medium transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3 sm:p-4">
+                <p className="text-white text-xs sm:text-sm font-medium transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                   Tap to view workout details
                 </p>
               </div>
             </div>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl group-hover:text-primary transition-colors">{workout.title}</CardTitle>
+            <CardHeader className="pb-2 px-4 sm:px-6 pt-4">
+              <CardTitle className="text-lg sm:text-xl group-hover:text-primary transition-colors">{workout.title}</CardTitle>
               <Badge variant="outline" className="bg-secondary/5">
                 {workout.difficulty}
               </Badge>

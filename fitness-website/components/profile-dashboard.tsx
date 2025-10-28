@@ -99,44 +99,44 @@ export default function ProfileDashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Welcome and Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="md:col-span-2 border-2 border-primary/20">
-          <CardHeader className="pb-2">
-            <CardTitle>Welcome back, {userData.displayName}!</CardTitle>
-            <CardDescription>Here's your health summary for this week</CardDescription>
+          <CardHeader className="pb-2 p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Welcome back, {userData.displayName}!</CardTitle>
+            <CardDescription className="text-sm">Here's your health summary for this week</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold">
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="w-full sm:w-auto">
+                <div className="text-xl sm:text-2xl font-bold">
                   {userData.workoutsCompleted} of {userData.weeklyGoal}
                 </div>
-                <div className="text-sm text-muted-foreground">Weekly workouts completed</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Weekly workouts completed</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold">{userData.streak} days</div>
-                <div className="text-sm text-muted-foreground">Current streak</div>
+              <div className="w-full sm:w-auto">
+                <div className="text-xl sm:text-2xl font-bold">{userData.streak} days</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Current streak</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold">
+              <div className="w-full sm:w-auto">
+                <div className="text-xl sm:text-2xl font-bold">
                   {userData.weightLoss > 0 ? `${userData.weightLoss} kg` : "N/A"}
                 </div>
-                <div className="text-sm text-muted-foreground">Weight loss this month</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Weight loss this month</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-2 border-primary/20">
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 p-4 sm:p-6">
             <CardTitle className="text-sm font-medium">Calories Burned</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userData.caloriesBurned}</div>
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="text-xl sm:text-2xl font-bold">{userData.caloriesBurned}</div>
             <div className="text-xs text-muted-foreground">This week</div>
-            <div className="mt-4 h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="mt-3 sm:mt-4 h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
                 className="bg-primary h-full rounded-full"
                 style={{ width: `${Math.min((userData.caloriesBurned / userData.calorieGoal) * 100, 100)}%` }}
@@ -146,17 +146,17 @@ export default function ProfileDashboard() {
         </Card>
 
         <Card className="border-2 border-primary/20">
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 p-4 sm:p-6">
             <CardTitle className="text-sm font-medium">Posture Quality</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="text-xl sm:text-2xl font-bold">
               {workoutStats.totalSessions > 0
                 ? `${Math.round((workoutStats.correctPostures / (workoutStats.correctPostures + workoutStats.incorrectPostures)) * 100)}%`
                 : "N/A"}
             </div>
             <div className="text-xs text-muted-foreground">Correct posture rate</div>
-            <div className="mt-4 h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="mt-3 sm:mt-4 h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
                 className="bg-primary h-full rounded-full"
                 style={{
@@ -238,13 +238,13 @@ export default function ProfileDashboard() {
       </Card>
 
       {/* Recent Activity and Upcoming */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Your latest workouts and achievements</CardDescription>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Recent Activity</CardTitle>
+            <CardDescription className="text-sm">Your latest workouts and achievements</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             {workoutStats.totalSessions > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
@@ -293,11 +293,11 @@ export default function ProfileDashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Recommendations</CardTitle>
-            <CardDescription>Personalized suggestions based on your activity</CardDescription>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Recommendations</CardTitle>
+            <CardDescription className="text-sm">Personalized suggestions based on your activity</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             <div className="space-y-4">
               {workoutStats.totalSessions > 0 ? (
                 <>

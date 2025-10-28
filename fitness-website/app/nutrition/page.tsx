@@ -54,24 +54,24 @@ export default function NutritionPage() {
   const goalOptions = ["Weight Loss", "Muscle Building", "Performance", "Health", "Maintenance"];
 
   return (
-    <main className="container mx-auto py-8 px-4 md:px-6">
+    <main className="container mx-auto py-6 sm:py-8 px-4 md:px-6">
       {/* --- Add Sonner Toaster --- */}
       <Toaster position="top-right" richColors />
 
       {/* Page Heading */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Nutrition Center</h1>
-        <p className="text-muted-foreground">Discover meal plans or calculate your needs</p>
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Nutrition Center</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">Discover meal plans or calculate your needs</p>
       </div>
 
       {/* Search & Filter Row */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div className="relative w-full md:flex-grow max-w-lg">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search meal plans by name..."
-            className="pl-8 w-full"
+            className="pl-8 w-full text-sm sm:text-base"
             value={searchTerm}
             onChange={handleSearchChange}
           />
@@ -80,7 +80,7 @@ export default function NutritionPage() {
         {/* Filter Button */}
         <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="w-full md:w-auto">
+            <Button variant="outline" className="w-full md:w-auto text-sm sm:text-base">
               <Filter className="h-4 w-4 mr-2" />
               Filters
               {/* Show count of active filters */}
@@ -93,11 +93,11 @@ export default function NutritionPage() {
           </DialogTrigger>
 
           {/* Filter Dialog Content */}
-          <DialogContent className="max-w-3xl sm:max-w-4xl">
-            <DialogHeader>
-              <DialogTitle>Filter Meal Plans</DialogTitle>
+          <DialogContent className="max-w-[95vw] sm:max-w-3xl md:max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="p-4 sm:p-6">
+              <DialogTitle className="text-lg sm:text-xl">Filter Meal Plans</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 p-4 sm:p-6 pt-0">
               {/* Dietary Preferences */}
               <Card className="border-none shadow-none">
                 <CardHeader className="p-4">
@@ -172,10 +172,10 @@ export default function NutritionPage() {
       </div>
 
       {/* Tabs for Meal Plans / Nutrition Calculator */}
-      <Tabs defaultValue="meal-plans" className="mb-8">
+      <Tabs defaultValue="meal-plans" className="mb-6 sm:mb-8">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="meal-plans">Meal Plans</TabsTrigger>
-          <TabsTrigger value="calculator">Nutrition Calculator</TabsTrigger>
+          <TabsTrigger value="meal-plans" className="text-sm sm:text-base">Meal Plans</TabsTrigger>
+          <TabsTrigger value="calculator" className="text-sm sm:text-base">Nutrition Calculator</TabsTrigger>
         </TabsList>
 
         <TabsContent value="meal-plans">

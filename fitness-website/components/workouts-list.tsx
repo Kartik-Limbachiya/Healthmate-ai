@@ -182,11 +182,11 @@ export default function WorkoutsList({
   }
 
   return (
-    <div className="mt-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="mt-6 sm:mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {workouts.map((workout) => (
           <Card key={workout.id} className="overflow-hidden h-full">
-            <div className="relative h-48 w-full overflow-hidden group">
+            <div className="relative h-40 sm:h-48 w-full overflow-hidden group">
               {workout.image.endsWith(".mp4") ? (
                 <video src={workout.image} autoPlay loop muted className="object-cover h-full w-full" />
               ) : (
@@ -197,47 +197,47 @@ export default function WorkoutsList({
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               )}
-              <div className="absolute top-3 right-3 flex gap-2">
-                <Badge className="bg-primary">{workout.category}</Badge>
+              <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex gap-2">
+                <Badge className="bg-primary text-xs sm:text-sm">{workout.category}</Badge>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-3 left-3 bg-background/80 hover:bg-background/90"
+                className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-background/80 hover:bg-background/90 h-8 w-8 sm:h-10 sm:w-10"
               >
-                <Bookmark className="h-4 w-4" />
+                <Bookmark className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="sr-only">Save workout</span>
               </Button>
             </div>
 
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl">
+            <CardHeader className="pb-2 p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">
                 <Link href={`/workouts/${workout.id}`} className="hover:underline">
                   {workout.title}
                 </Link>
               </CardTitle>
             </CardHeader>
-            <CardContent className="pb-2">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <CardContent className="pb-2 p-4 sm:p-6 pt-0">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                 <div className="flex items-center">
-                  <Clock className="mr-1 h-4 w-4" />
+                  <Clock className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
                   {workout.duration}
                 </div>
                 <div className="flex items-center">
-                  <Flame className="mr-1 h-4 w-4" />
+                  <Flame className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
                   {workout.calories} cal
                 </div>
                 <div className="flex items-center">
-                  <BarChart className="mr-1 h-4 w-4" />
+                  <BarChart className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
                   {workout.difficulty}
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline" size="sm" asChild>
+            <CardFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between p-4 sm:p-6 pt-0">
+              <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
                 <Link href={`/workouts/${workout.id}`}>View Details</Link>
               </Button>
-              <Button size="sm" onClick={() => router.push(`/workouts/LiveWorkout`)}>
+              <Button size="sm" onClick={() => router.push(`/workouts/LiveWorkout`)} className="w-full sm:w-auto">
                 Start Live Workout
               </Button>
             </CardFooter>

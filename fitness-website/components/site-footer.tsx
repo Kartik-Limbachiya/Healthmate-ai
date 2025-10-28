@@ -4,38 +4,38 @@ import { Facebook, Instagram, Twitter, Youtube, Activity } from "lucide-react"
 export default function SiteFooter() {
   return (
     <footer className="border-t bg-secondary text-white">
-      <div className="container py-8 md:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-4">
+      <div className="container py-6 sm:py-8 md:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+          <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center space-x-2">
-              <Activity className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-bold">HealthMate</h3>
+              <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <h3 className="text-base sm:text-lg font-bold">HealthMate</h3>
             </div>
-            <p className="text-sm text-gray-400">
+            <p className="text-xs sm:text-sm text-gray-400">
               Your all-in-one health partner for tracking workouts, nutrition, and progress.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3 sm:space-x-4">
               <Link href="#" className="text-gray-400 hover:text-primary">
-                <Facebook className="h-5 w-5" />
+                <Facebook className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="sr-only">Facebook</span>
               </Link>
               <Link href="#" className="text-gray-400 hover:text-primary">
-                <Instagram className="h-5 w-5" />
+                <Instagram className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="sr-only">Instagram</span>
               </Link>
               <Link href="#" className="text-gray-400 hover:text-primary">
-                <Twitter className="h-5 w-5" />
+                <Twitter className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="sr-only">Twitter</span>
               </Link>
               <Link href="#" className="text-gray-400 hover:text-primary">
-                <Youtube className="h-5 w-5" />
+                <Youtube className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="sr-only">YouTube</span>
               </Link>
             </div>
           </div>
           <div>
-            <h3 className="text-lg font-bold mb-4">Features</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">Features</h3>
+            <ul className="space-y-2 text-xs sm:text-sm">
               <li>
                 <Link href="/workouts" className="text-gray-400 hover:text-primary">
                   Workout Library
@@ -59,8 +59,8 @@ export default function SiteFooter() {
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-bold mb-4">Resources</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">Resources</h3>
+            <ul className="space-y-2 text-xs sm:text-sm">
               <li>
                 <Link href="#" className="text-gray-400 hover:text-primary">
                   Blog
@@ -84,8 +84,8 @@ export default function SiteFooter() {
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-bold mb-4">Company</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">Company</h3>
+            <ul className="space-y-2 text-xs sm:text-sm">
               <li>
                 <Link href="#" className="text-gray-400 hover:text-primary">
                   About Us
@@ -109,7 +109,7 @@ export default function SiteFooter() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-gray-800 text-center text-sm text-gray-400">
+        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-800 text-center text-xs sm:text-sm text-gray-400">
           <p>&copy; {new Date().getFullYear()} HealthMate. All rights reserved.</p>
         </div>
       </div>
