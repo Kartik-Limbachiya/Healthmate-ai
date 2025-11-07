@@ -20,7 +20,7 @@ const testimonials = [
   },
   {
     id: 2,
-    name: "Michael Chen",
+    name: "Jessica Williams",
     role: "Marathon Runner",
     content:
       "As someone who's been running for years, I was surprised by how much the targeted strength workouts improved my performance. My marathon time improved by 15 minutes!",
@@ -29,7 +29,7 @@ const testimonials = [
   },
   {
     id: 3,
-    name: "Jessica Williams",
+    name: "Michael Chen",
     role: "Busy Professional",
     content:
       "The quick workout options and meal planning features fit perfectly into my busy schedule. I no longer have to choose between my career and staying fit.",
@@ -38,7 +38,7 @@ const testimonials = [
   },
   {
     id: 4,
-    name: "David Martinez",
+    name: "Lucy Martinez",
     role: "Fitness Enthusiast",
     content:
       "The variety of workouts keeps me motivated every day. I've built muscle, improved my endurance, and feel better than ever. This platform is a game-changer!",
