@@ -15,7 +15,7 @@ const testimonials = [
     role: "Lost 30 lbs in 6 months",
     content:
       "HealthMate completely transformed my approach to fitness. The personalized workout plans and nutrition advice helped me achieve results I never thought possible.",
-    avatar: "/placeholder.svg?height=100&width=100",
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkONqfW76UJ-rYw8J2tx1Dm78Ivhpq68NvBw&s",
     rating: 5,
   },
   {
@@ -24,7 +24,7 @@ const testimonials = [
     role: "Marathon Runner",
     content:
       "As someone who's been running for years, I was surprised by how much the targeted strength workouts improved my performance. My marathon time improved by 15 minutes!",
-    avatar: "/placeholder.svg?height=100&width=100",
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJtGeHXUQ6PAfC55UF_-pYC8aCvzd6knG6ug&s",
     rating: 5,
   },
   {
@@ -33,8 +33,17 @@ const testimonials = [
     role: "Busy Professional",
     content:
       "The quick workout options and meal planning features fit perfectly into my busy schedule. I no longer have to choose between my career and staying fit.",
-    avatar: "/placeholder.svg?height=100&width=100",
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQToaRakUTpQNWbzuNMSft6UNbVW_VaX35LbQ&s",
     rating: 4,
+  },
+  {
+    id: 4,
+    name: "David Martinez",
+    role: "Fitness Enthusiast",
+    content:
+      "The variety of workouts keeps me motivated every day. I've built muscle, improved my endurance, and feel better than ever. This platform is a game-changer!",
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqGbKzZ8X9SU5EYTjDxPBg5IUotTOf3GxoNg&s",
+    rating: 5,
   },
 ]
 
@@ -85,7 +94,7 @@ export default function TestimonialsSection() {
           <h2 className="text-2xl sm:text-3xl font-bold text-center">What Our Members Say</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {testimonials.map((testimonial, index) => (
             <Card
               key={testimonial.id}
@@ -96,7 +105,7 @@ export default function TestimonialsSection() {
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-full overflow-hidden border-2 border-primary flex-shrink-0">
                     <Image
-                      src={testimonial.avatar || "/placeholder.svg"}
+                      src={testimonial.avatar}
                       alt={testimonial.name}
                       fill
                       className="object-cover"
@@ -159,4 +168,3 @@ export default function TestimonialsSection() {
     </section>
   )
 }
-

@@ -143,7 +143,7 @@ export default function SignupPage() {
               <Label htmlFor="firstName" className="text-sm sm:text-base">First name</Label>
               <Input
                 id="firstName"
-                placeholder="John"
+                placeholder="Fit"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 disabled={loading}
@@ -154,7 +154,7 @@ export default function SignupPage() {
               <Label htmlFor="lastName" className="text-sm sm:text-base">Last name</Label>
               <Input
                 id="lastName"
-                placeholder="Doe"
+                placeholder="Tuber"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 disabled={loading}
@@ -167,7 +167,7 @@ export default function SignupPage() {
             <Input
               id="email"
               type="email"
-              placeholder="john.doe@example.com"
+              placeholder="fittuber@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}

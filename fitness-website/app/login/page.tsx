@@ -100,7 +100,7 @@ export default function LoginPage() {
             <Input
               id="email"
               type="email"
-              placeholder="john.doe@example.com"
+              placeholder="fittuber@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
