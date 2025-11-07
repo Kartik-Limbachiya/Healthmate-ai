@@ -17,7 +17,7 @@ const featuredWorkouts = [
     difficulty: "Intermediate",
     duration: "30 min",
     calories: "350",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/9015.mp4",
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const featuredWorkouts = [
     difficulty: "Beginner",
     duration: "25 min",
     calories: "220",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/2006.mp4",
   },
   {
     id: 3,
@@ -35,7 +35,7 @@ const featuredWorkouts = [
     difficulty: "Advanced",
     duration: "45 min",
     calories: "400",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/7006.mp4",
   },
   {
     id: 4,
@@ -44,7 +44,7 @@ const featuredWorkouts = [
     difficulty: "All Levels",
     duration: "40 min",
     calories: "180",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://d2m0n84d5tgmh1.cloudfront.net/training-videos-watermarked/10020.mp4",
   },
 ]
 
