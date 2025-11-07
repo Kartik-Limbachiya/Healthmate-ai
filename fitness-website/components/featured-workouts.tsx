@@ -1,8 +1,6 @@
-//components\featured-workouts.tsx
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { Clock, Flame, BarChart } from "lucide-react"
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -61,11 +59,13 @@ export default function FeaturedWorkouts() {
             }}
           >
             <div className="relative h-40 sm:h-48 w-full overflow-hidden">
-              <Image
-                src={workout.image || "/placeholder.svg"}
-                alt={workout.title}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              <video
+                src={workout.image}
+                loop
+                muted
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
               <Badge className="absolute top-3 right-3 bg-primary">{workout.category}</Badge>
 
@@ -130,4 +130,3 @@ export default function FeaturedWorkouts() {
     </div>
   )
 }
-
