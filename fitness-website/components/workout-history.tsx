@@ -1,7 +1,7 @@
 //components\workout-history.tsx
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { ChevronLeft, ChevronRight, Filter, Search, Dumbbell } from "lucide-react"
 import Link from "next/link"
 import { format, subDays, addDays, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns"
@@ -15,6 +15,25 @@ import { Badge } from "@/components/ui/badge"
 import { auth, db, rtdb } from "@/firebase-config"
 import { collection, query, where, orderBy, getDocs, limit } from "firebase/firestore"
 import { ref, onValue } from "firebase/database"
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart"
+import {
+  LineChart as ReLineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  PieChart as RePieChart,
+  Pie,
+  Cell,
+  BarChart as ReBarChart,
+  Bar,
+} from "recharts"
 
 export default function WorkoutHistory() {
   const [view, setView] = useState("list")
@@ -30,6 +49,60 @@ export default function WorkoutHistory() {
     incorrectPostures: 0,
   })
   const [loading, setLoading] = useState(true)
+
+  const chartData = useMemo(() => {
+    const postureData = [
+      {
+        name: "Correct",
+        value: workoutStats.correctPostures || 0,
+      },
+      {
+        name: "Incorrect",
+        value: workoutStats.incorrectPostures || 0,
+      },
+    ]
+
+    const typeMap = new Map<string, number>()
+    workoutHistory.forEach((workout) => {
+      const key = (workout.type || "General").toString()
+      typeMap.set(key, (typeMap.get(key) || 0) + (workout.totalReps || workout.reps || 0))
+    })
+    const typeData = Array.from(typeMap.entries()).map(([name, value]) => ({ name, value }))
+
+    const dateMap = new Map<string, { date: Date; sessions: number; calories: number }>()
+    workoutHistory.forEach((workout) => {
+      const date = workout.date ? new Date(workout.date) : new Date()
+      const key = format(date, "yyyy-MM-dd")
+      const existing = dateMap.get(key) || { date, sessions: 0, calories: 0 }
+      existing.sessions += 1
+      existing.calories += workout.calories || 0
+      dateMap.set(key, existing)
+    })
+    const trendData = Array.from(dateMap.values())
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .slice(-14)
+      .map((entry) => ({
+        date: format(entry.date, "MMM d"),
+        sessions: entry.sessions,
+        calories: entry.calories,
+      }))
+
+    return { postureData, typeData, trendData }
+  }, [workoutHistory, workoutStats])
+
+  const postureConfig = {
+    Correct: { label: "Correct", color: "hsl(142, 76%, 36%)" },
+    Incorrect: { label: "Incorrect", color: "hsl(0, 84%, 60%)" },
+  }
+
+  const trendConfig = {
+    sessions: { label: "Sessions", color: "hsl(213, 94%, 57%)" },
+    calories: { label: "Calories", color: "hsl(25, 95%, 53%)" },
+  }
+
+  const typeConfig = {
+    value: { label: "Total Reps", color: "hsl(268, 83%, 60%)" },
+  }
 
   useEffect(() => {
     const user = auth.currentUser
@@ -85,9 +158,11 @@ export default function WorkoutHistory() {
 
   // Filter workouts based on search term and workout type
   const filteredWorkouts = workoutHistory.filter((workout) => {
-    const matchesSearch = searchTerm === "" || workout.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const label = ((workout.title || workout.name || workout.type || "") as string).toLowerCase()
+    const matchesSearch = searchTerm === "" || label.includes(searchTerm.toLowerCase())
 
-    const matchesType = workoutType === "all" || workout.type.toLowerCase() === workoutType.toLowerCase()
+    const matchesType =
+      workoutType === "all" || (workout.type || "").toLowerCase() === workoutType.toLowerCase()
 
     return matchesSearch && matchesType
   })
@@ -123,6 +198,8 @@ export default function WorkoutHistory() {
     )
   }
 
+  const postureHasData = chartData.postureData.some((item) => item.value > 0)
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -146,6 +223,86 @@ export default function WorkoutHistory() {
             <span className="sr-only">Filter</span>
           </Button>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Recent Activity Trend</CardTitle>
+            <CardDescription>Sessions and calories over the last two weeks</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {chartData.trendData.length ? (
+              <ChartContainer config={trendConfig} className="h-64">
+                <ReLineChart data={chartData.trendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis allowDecimals={false} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line type="monotone" dataKey="sessions" stroke="var(--color-sessions)" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="calories" stroke="var(--color-calories)" strokeWidth={2} dot={false} />
+                </ReLineChart>
+              </ChartContainer>
+            ) : (
+              <div className="text-sm text-muted-foreground text-center py-10">
+                Log workouts to visualize your momentum.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Posture Breakdown</CardTitle>
+            <CardDescription>Aggregate correct vs incorrect form</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={postureConfig} className="h-64">
+              <RePieChart>
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Pie
+                  data={postureHasData ? chartData.postureData : [{ name: "Correct", value: 1 }]}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={postureHasData ? 4 : 0}
+                >
+                  {(postureHasData ? chartData.postureData : [{ name: "Correct", value: 1 }]).map((item) => (
+                    <Cell key={item.name} fill={`var(--color-${item.name})`} />
+                  ))}
+                </Pie>
+                <ChartLegend content={<ChartLegendContent />} />
+              </RePieChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Volume by Workout Type</CardTitle>
+            <CardDescription>Total reps recorded for each category</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {chartData.typeData.length ? (
+              <ChartContainer config={typeConfig} className="h-64">
+                <ReBarChart data={chartData.typeData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis allowDecimals={false} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="value" fill="var(--color-value)" radius={[8, 8, 0, 0]} />
+                </ReBarChart>
+              </ChartContainer>
+            ) : (
+              <div className="text-sm text-muted-foreground text-center py-10">
+                Keep training to populate your volume distribution.
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs value={view} onValueChange={setView} className="space-y-4">
@@ -193,31 +350,42 @@ export default function WorkoutHistory() {
             <CardContent>
               {filteredWorkouts.length > 0 ? (
                 <div className="space-y-4">
-                  {filteredWorkouts.map((workout) => (
-                    <div
-                      key={workout.id}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="bg-primary/10 p-2 rounded-full">
-                          <Dumbbell className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <div className="font-medium">{workout.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {format(new Date(workout.date), "PPP")} • {workout.duration} min • {workout.calories}{" "}
-                            calories
+                  {filteredWorkouts.map((workout) => {
+                    const workoutLabel = workout.title || workout.name || `${workout.type || "Workout"} session`
+                    const detailHref = workout.workoutId
+                      ? `/workouts/${workout.workoutId}`
+                      : workout.type === "pushup"
+                      ? "/workouts/LiveWorkout/LivePushup"
+                      : workout.type === "squat"
+                      ? "/workouts/LiveWorkout"
+                      : "/workouts"
+                    return (
+                      <div
+                        key={workout.id}
+                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="bg-primary/10 p-2 rounded-full">
+                            <Dumbbell className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-medium capitalize">{workoutLabel}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {format(new Date(workout.date), "PPP")} • {(workout.totalReps || workout.reps || 0)} reps • {workout.calories || 0} cal
+                            </div>
                           </div>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="capitalize">
+                            {workout.type || "general"}
+                          </Badge>
+                          <Button variant="outline" size="sm" asChild>
+                            <Link href={detailHref}>View Session</Link>
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">{workout.type}</Badge>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/workouts/${workout.workoutId}`}>View Details</Link>
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-8">

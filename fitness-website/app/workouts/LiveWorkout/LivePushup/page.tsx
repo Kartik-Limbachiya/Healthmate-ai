@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2, Wifi, WifiOff } from "lucide-react";
+import { auth, db, rtdb } from "@/firebase-config";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { ref as rtdbRef, get as rtdbGet, set as rtdbSet, update as rtdbUpdate } from "firebase/database";
 
 export default function LivePushup() {
   const router = useRouter();
@@ -18,17 +21,53 @@ export default function LivePushup() {
   const [feedback, setFeedback] = useState<string[]>([]);
   const [analyzing, setAnalyzing] = useState(false);
   const [currentForm, setCurrentForm] = useState<string>("Fix Form");
+  const [repStats, setRepStats] = useState<{ correct: number; incorrect: number }>({ correct: 0, incorrect: 0 });
   
   const analysisInterval = useRef<NodeJS.Timeout | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 3;
+  const maxReconnectAttempts = 10;
   const [connection, setConnection] = useState<"connecting" | "connected" | "error" | "closed">("closed");
   const [errorDetails, setErrorDetails] = useState<string>("");
   const [isRetrying, setIsRetrying] = useState(false);
+  const sessionStartRef = useRef<number | null>(null);
 
   // WebSocket URL
-  const WEBSOCKET_URL = "wss://pushups-analyzer-api.onrender.com/ws/live_pushup";
+  const WEBSOCKET_URL = "wss://new-pushups-analyzer-api.onrender.com/ws/live_pushup";
+  const API_BASE_URL = "https://new-pushups-analyzer-api.onrender.com";
+
+  // Pre-warm the Render server (useful for free-tier cold starts)
+  const prewarmServer = async (maxWaitMs: number = 90000) => {
+    const start = Date.now();
+    let attempt = 0;
+    const endpoints = [
+      `${API_BASE_URL}/health`,
+      `${API_BASE_URL}/`
+    ];
+
+    const fetchWithTimeout = async (url: string, timeoutMs: number) => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { cache: 'no-store', signal: controller.signal });
+        return res.ok;
+      } catch (_) {
+        return false;
+      } finally {
+        clearTimeout(id);
+      }
+    };
+
+    while (Date.now() - start < maxWaitMs) {
+      attempt += 1;
+      const okHealth = await fetchWithTimeout(endpoints[0], 5000);
+      const okRoot = okHealth ? true : await fetchWithTimeout(endpoints[1], 5000);
+      if (okHealth || okRoot) return true;
+      const delay = Math.min(8000, 1000 + attempt * 1000);
+      await new Promise(r => setTimeout(r, delay));
+    }
+    return false;
+  };
 
   // Connect to WebSocket with improved error handling
   const connectWebSocket = (isRetry = false) => {
@@ -55,14 +94,14 @@ export default function LivePushup() {
       ws.binaryType = 'blob';
       wsRef.current = ws;
 
-      // Set connection timeout
+      // Set connection timeout (extended for cold starts)
       const connectionTimeout = setTimeout(() => {
         if (ws.readyState === WebSocket.CONNECTING) {
-          console.error("[WebSocket] Connection timeout after 30s");
+          console.error("[WebSocket] Connection timeout after 90s");
           ws.close();
           handleConnectionFailure("Connection timeout. Server may be sleeping.");
         }
-      }, 30000); // 30 second timeout
+      }, 90000);
 
       ws.onopen = () => {
         clearTimeout(connectionTimeout);
@@ -158,7 +197,8 @@ export default function LivePushup() {
     console.log(`[WebSocket] Reconnecting in ${delay/1000}s (attempt ${reconnectAttempts.current})`);
     setFeedback(prev => [...prev.slice(-3), `Reconnecting in ${delay/1000}s...`]);
     
-    setTimeout(() => {
+    setTimeout(async () => {
+      await prewarmServer(30000);
       connectWebSocket(true);
     }, delay);
   };
@@ -198,6 +238,13 @@ export default function LivePushup() {
     if (data.count !== undefined) {
       setPushupCount(data.count);
     }
+
+    if (typeof data.correct_reps === 'number' || typeof data.incorrect_reps === 'number') {
+      setRepStats(prev => ({
+        correct: typeof data.correct_reps === 'number' ? data.correct_reps : prev.correct,
+        incorrect: typeof data.incorrect_reps === 'number' ? data.incorrect_reps : prev.incorrect,
+      }));
+    }
   };
 
   // Start the workout session
@@ -206,7 +253,17 @@ export default function LivePushup() {
     setFeedback(["📋 Initializing session..."]);
     setPushupCount(0);
     setCurrentForm("Fix Form");
+    setRepStats({ correct: 0, incorrect: 0 });
     reconnectAttempts.current = 0;
+    sessionStartRef.current = Date.now();
+    // Pre-warm Render server to reduce WS cold-start failures
+    setFeedback(prev => [...prev.slice(-3), "🌐 Warming up server (Render free tier)..."]);
+    const warmed = await prewarmServer();
+    if (warmed) {
+      setFeedback(prev => [...prev.slice(-3), "✅ Server awake. Connecting..."]);
+    } else {
+      setFeedback(prev => [...prev.slice(-3), "⚠️ Server might still be waking. Attempting connection..."]);
+    }
     connectWebSocket();
   };
 
@@ -216,8 +273,8 @@ export default function LivePushup() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
-          width: { ideal: 640 },
-          height: { ideal: 480 },
+          width: { ideal: 480 },
+          height: { ideal: 360 },
           facingMode: "user"
         }
       });
@@ -237,8 +294,8 @@ export default function LivePushup() {
               setAnalyzing(true);
               
               if (canvasRef.current) {
-                const width = videoRef.current!.videoWidth || 640;
-                const height = videoRef.current!.videoHeight || 480;
+                const width = videoRef.current!.videoWidth || 480;
+                const height = videoRef.current!.videoHeight || 360;
                 canvasRef.current.width = width;
                 canvasRef.current.height = height;
               }
@@ -288,12 +345,52 @@ export default function LivePushup() {
     reconnectAttempts.current = 0;
     setIsRetrying(false);
     setFeedback(prev => [...prev.slice(-3), "✅ Session ended. Great work! 💪"]);
+
+    // Persist session data
+    saveSession().catch((e) => console.error("[Session] Save error", e));
+  };
+
+  const saveSession = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const durationSec = sessionStartRef.current ? Math.round((Date.now() - sessionStartRef.current) / 1000) : 0;
+    const totalReps = Math.max(pushupCount, repStats.correct + repStats.incorrect);
+    const calories = Math.round(totalReps * 0.5); // simple heuristic
+
+    // Firestore: add workout document
+    await addDoc(collection(db, "workouts"), {
+      userId: user.uid,
+      type: "pushup",
+      totalReps,
+      correctReps: repStats.correct,
+      incorrectReps: repStats.incorrect,
+      durationSec,
+      calories,
+      date: serverTimestamp(),
+    });
+
+    // Realtime DB: aggregate stats
+    const statsRef = rtdbRef(rtdb, `workoutStats/${user.uid}`);
+    const snap = await rtdbGet(statsRef);
+    const prev = snap.exists() ? snap.val() : {};
+    await rtdbSet(statsRef, {
+      totalSessions: (prev.totalSessions || 0) + 1,
+      totalDuration: (prev.totalDuration || 0) + durationSec,
+      totalCaloriesBurned: (prev.totalCaloriesBurned || 0) + calories,
+      correctPostures: (prev.correctPostures || 0) + repStats.correct,
+      incorrectPostures: (prev.incorrectPostures || 0) + repStats.incorrect,
+      lastWorkout: new Date().toISOString(),
+    });
   };
 
   // Capture and send frames
   const captureAndAnalyze = () => {
     if (!analyzing || !videoRef.current || !canvasRef.current) return;
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+    // Backpressure: avoid piling up unsent data
+    if (wsRef.current.bufferedAmount > 512 * 1024) {
+      return;
+    }
     
     try {
       const video = videoRef.current;
@@ -310,7 +407,7 @@ export default function LivePushup() {
         if (blob && wsRef.current?.readyState === WebSocket.OPEN) {
           wsRef.current.send(blob);
         }
-      }, "image/jpeg", 0.8);
+      }, "image/jpeg", 0.6);
     } catch (error) {
       console.error("[Frame] Capture error:", error);
     }
@@ -319,7 +416,7 @@ export default function LivePushup() {
   // Frame capture interval
   useEffect(() => {
     if (analyzing && connection === "connected") {
-      analysisInterval.current = setInterval(captureAndAnalyze, 100);
+      analysisInterval.current = setInterval(captureAndAnalyze, 200);
     } else {
       if (analysisInterval.current) {
         clearInterval(analysisInterval.current);
@@ -424,26 +521,36 @@ export default function LivePushup() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-green-100 dark:bg-green-900/30 p-6 rounded-lg text-center border-2 border-green-500">
-              <div className="text-5xl font-bold text-green-600 dark:text-green-400">{pushupCount}</div>
-              <div className="text-sm text-muted-foreground mt-2">Pushup Reps</div>
+              <div className="text-5xl font-bold text-green-600 dark:text-green-400">{Math.max(pushupCount, repStats.correct + repStats.incorrect)}</div>
+              <div className="text-sm text-muted-foreground mt-2">Total Reps</div>
             </div>
-            
-            <div className={`p-6 rounded-lg text-center border-2 ${
+
+            <div className="bg-emerald-100 dark:bg-emerald-900/30 p-6 rounded-lg text-center border-2 border-emerald-500">
+              <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">{repStats.correct}</div>
+              <div className="text-sm text-muted-foreground mt-2">Correct Reps</div>
+            </div>
+
+            <div className="bg-rose-100 dark:bg-rose-900/30 p-6 rounded-lg text-center border-2 border-rose-500">
+              <div className="text-4xl font-bold text-rose-600 dark:text-rose-400">{repStats.incorrect}</div>
+              <div className="text-sm text-muted-foreground mt-2">Incorrect Reps</div>
+            </div>
+          </div>
+
+          <div className={`p-6 rounded-lg text-center border-2 ${
+            currentForm === "Fix Form" 
+              ? "bg-yellow-100 dark:bg-yellow-900/30 border-yellow-500" 
+              : "bg-blue-100 dark:bg-blue-900/30 border-blue-500"
+          }`}>
+            <div className={`text-3xl font-bold ${
               currentForm === "Fix Form" 
-                ? "bg-yellow-100 dark:bg-yellow-900/30 border-yellow-500" 
-                : "bg-blue-100 dark:bg-blue-900/30 border-blue-500"
+                ? "text-yellow-600 dark:text-yellow-400" 
+                : "text-blue-600 dark:text-blue-400"
             }`}>
-              <div className={`text-3xl font-bold ${
-                currentForm === "Fix Form" 
-                  ? "text-yellow-600 dark:text-yellow-400" 
-                  : "text-blue-600 dark:text-blue-400"
-              }`}>
-                {currentForm}
-              </div>
-              <div className="text-sm text-muted-foreground mt-2">Current Status</div>
+              {currentForm}
             </div>
+            <div className="text-sm text-muted-foreground mt-2">Current Status</div>
           </div>
           
           {/* Feedback Log */}
