@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Loader2 } from "lucide-react";
-import { auth } from "@/firebase-config";
+import { auth, db } from "@/firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 
 export default function ChatbotPage() {
@@ -41,6 +42,18 @@ export default function ChatbotPage() {
     setIsLoading(true);
 
     try {
+      let profileData = null;
+      if (userId) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", userId));
+          if (userDoc.exists()) {
+            profileData = userDoc.data();
+          }
+        } catch (err) {
+          console.error("Error fetching user profile:", err);
+        }
+      }
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -48,7 +61,8 @@ export default function ChatbotPage() {
         },
         body: JSON.stringify({ 
           messages: newMessages,
-          userId: userId
+          userId: userId,
+          profile: profileData
         }),
       });
 

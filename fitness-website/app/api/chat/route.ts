@@ -1,56 +1,34 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { findRecommendations } from '@/lib/rag';
-import * as admin from 'firebase-admin';
 
-// Only try to use Firebase Admin if credentials are provided in the environment.
-// For local development without a service account, we will fall back to Gemini-only extraction.
-let dbTraits: any = {};
-if (!admin.apps.length && process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-  try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-  } catch (error: any) {
-    console.log('Firebase admin initialization skipped/failed:', error.message);
-  }
-}
-
-const ai = new GoogleGenAI({ apiKey: 'AIzaSyCEgXYvKip0ULCvQWWfgUu9Z6GC52xkIKc' });
+const ai = new GoogleGenAI({ apiKey: 'GEMINI_API_KEY' });
 
 export async function POST(req: Request) {
   try {
-    const { messages, userId } = await req.json();
+    const { messages, userId, profile } = await req.json();
 
     const lastMessage = messages[messages.length - 1].content;
 
-    // Fetch DB traits if we have a userId AND Firebase Admin is successfully initialized
-    if (userId && admin.apps.length > 0) {
-      try {
-        const userDoc = await admin.firestore().collection('users').doc(userId).get();
-        if (userDoc.exists) {
-          const data = userDoc.data() || {};
+    let dbTraits: any = {};
+    if (profile) {
+      const data = profile;
           
-          let age;
-          if (data.dob) {
-            const birthDate = new Date(data.dob);
-            age = new Date().getFullYear() - birthDate.getFullYear();
-          }
-
-          dbTraits = {
-            name: data.displayName || data.firstName || "Athlete",
-            age: age,
-            sex: data.gender === "female" ? "Female" : (data.gender === "male" ? "Male" : undefined),
-            weight: data.weight,
-            height: data.height ? data.height / 100 : undefined, // cm to m
-            goal: data.fitnessGoal
-          };
-          console.log("Loaded traits from DB:", dbTraits);
-        }
-      } catch (err) {
-        console.error("Failed to load user info from DB", err);
+      let age;
+      if (data.dob) {
+        const birthDate = new Date(data.dob);
+        age = new Date().getFullYear() - birthDate.getFullYear();
       }
+
+      dbTraits = {
+        name: data.displayName || data.firstName || "Athlete",
+        age: age,
+        sex: data.gender === "female" ? "Female" : (data.gender === "male" ? "Male" : undefined),
+        weight: data.weight,
+        height: data.height ? data.height / 100 : undefined, // cm to m
+        goal: data.fitnessGoal
+      };
+      console.log("Loaded traits from frontend profile:", dbTraits);
     }
 
     // Step 1: Extract structured parameters using Gemini
