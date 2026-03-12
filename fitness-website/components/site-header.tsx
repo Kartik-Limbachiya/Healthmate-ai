@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Activity, ChevronDown } from "lucide-react";
+import { Menu, Activity, ChevronDown, Bot } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -80,6 +80,13 @@ export default function SiteHeader() {
               Nutrition
             </Link>
             <Link
+              href="/chatbot"
+              className="text-sm font-bold text-primary transition-colors hover:text-primary/80 flex items-center gap-1"
+            >
+              <Bot className="h-4 w-4" />
+              AI Coach
+            </Link>
+            <Link
               href="/profile"
               className="text-sm font-medium transition-colors hover:text-primary"
             >
@@ -143,6 +150,14 @@ export default function SiteHeader() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Nutrition
+                </Link>
+                <Link
+                  href="/chatbot"
+                  className="text-lg font-bold text-primary transition-colors hover:text-primary/80 flex items-center gap-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Bot className="h-5 w-5" />
+                  AI Coach
                 </Link>
                 <Link
                   href="/profile"

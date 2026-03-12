@@ -98,7 +98,15 @@ export default function SignupPage() {
       router.push("/profile");
     } catch (error: any) {
       console.error("Signup error:", error);
-      setError(error.message || "Unable to create account. Try again later.");
+      let errorMessage = error.message || "Unable to create account. Try again later.";
+      
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "Email already in use. Please go to Login. (If you just got a permissions error, your auth account was created but your database profile wasn't. Please delete the auth user in Firebase Console or try a different email.)";
+      } else if (errorMessage.toLowerCase().includes('missing or insufficient permissions')) {
+        errorMessage = "Database Permissions Denied! 🛑 YOU MUST FIX YOUR FIREBASE RULES: Go to Firebase Console -> Firestore Database -> Rules, and set 'allow read, write: if request.auth != null;'. Then delete this email from the Auth tab and try again.";
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

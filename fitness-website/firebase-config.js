@@ -6,13 +6,13 @@ import { getDatabase } from "firebase/database";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBSbUQ6UQTMvRQlwUWgw-qFTaUoH6hwtRk",
-  authDomain: "healthmate-1-4dc11.firebaseapp.com",
-  databaseURL: "https://healthmate-1-4dc11-default-rtdb.firebaseio.com",
-  projectId: "healthmate-1-4dc11",
-  storageBucket: "healthmate-1-4dc11.firebasestorage.app",
-  messagingSenderId: "295132538205",
-  appId: "1:295132538205:web:44532707696a02cab9f4b4"
+  apiKey: "AIzaSyCB79d36fqlibSzotvtKgLxa3xP5_uEaVg",
+  authDomain: "healthmate-ai-683ba.firebaseapp.com",
+  databaseURL: "https://healthmate-ai-683ba-default-rtdb.firebaseio.com",
+  projectId: "healthmate-ai-683ba",
+  storageBucket: "healthmate-ai-683ba.firebasestorage.app",
+  messagingSenderId: "26037118687",
+  appId: "1:26037118687:web:da83ee1de48358e3152b6a"
 };
 // Initialize Firebase only once
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
