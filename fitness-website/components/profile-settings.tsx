@@ -13,9 +13,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { auth, db, storage } from "@/firebase-config"
+import { auth, db } from "@/firebase-config"
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { updateProfile } from "firebase/auth"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Loader2, Camera } from "lucide-react"
@@ -201,38 +200,9 @@ export default function ProfileSettings() {
     const user = auth.currentUser
     if (!user || !e.target.files || e.target.files.length === 0) return
 
-    const file = e.target.files[0]
-    setUploadingImage(true)
-
-    try {
-      // Upload image to Firebase Storage
-      const storageRef = ref(storage, `profile_images/${user.uid}`)
-      await uploadBytes(storageRef, file)
-
-      // Get download URL
-      const downloadURL = await getDownloadURL(storageRef)
-
-      // Update user profile in Firebase Auth
-      await updateProfile(user, {
-        photoURL: downloadURL,
-      })
-
-      // Update user document in Firestore
-      const userDocRef = doc(db, "users", user.uid)
-      await updateDoc(userDocRef, {
-        photoURL: downloadURL,
-      })
-
-      // Update local state
-      setUserData({
-        ...userData,
-        photoURL: downloadURL,
-      })
-    } catch (error) {
-      console.error("Error uploading profile image:", error)
-    } finally {
-      setUploadingImage(false)
-    }
+    // Firebase Storage is not enabled for this project
+    // Profile image upload is disabled
+    console.log("Profile image upload is not available (Firebase Storage not configured)")
   }
 
   if (loading) {
