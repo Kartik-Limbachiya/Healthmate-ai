@@ -14,11 +14,15 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
-// Initialize Firebase only once
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-const auth = getAuth(app)
-const db = getFirestore(app)
-const rtdb = getDatabase(app)
+// Only initialize Firebase if the API key is available (not during build/SSG)
+let app, auth, db, rtdb;
+
+if (firebaseConfig.apiKey) {
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+  auth = getAuth(app);
+  db = getFirestore(app);
+  rtdb = getDatabase(app);
+}
 
 export { auth, db, rtdb }
