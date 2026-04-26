@@ -100,12 +100,14 @@ function ChatbotContent() {
       // Fetch today's meals directly on the client to avoid backend index/timezone mismatches
       let todaysMeals: any[] = [];
       try {
-        const { collection, query, where, getDocs, Timestamp } = await import("firebase/firestore");
+        const { collection, query, where, getDocs, Timestamp, orderBy } = await import("firebase/firestore");
         const q = query(
           collection(db, "meals"),
           where("userId", "==", user.uid),
           where("date", ">=", Timestamp.fromDate(startOfDay)),
-          where("date", "<=", Timestamp.fromDate(endOfDay))
+          where("date", "<=", Timestamp.fromDate(endOfDay)),
+          orderBy("date", "asc"),
+          orderBy("createdAt", "asc")
         );
         const querySnapshot = await getDocs(q);
         todaysMeals = querySnapshot.docs.map(doc => doc.data());
