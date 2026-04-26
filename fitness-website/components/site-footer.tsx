@@ -62,7 +62,7 @@ export default function SiteFooter() {
             <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">Resources</h3>
             <ul className="space-y-2 text-xs sm:text-sm">
               <li>
-                <Link href="#" className="text-gray-400 hover:text-primary">
+                <Link href="/community" className="text-gray-400 hover:text-primary">
                   Blog
                 </Link>
               </li>

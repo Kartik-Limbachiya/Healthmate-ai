@@ -50,6 +50,9 @@ export default function SiteHeader() {
             <Link href="/nutrition" className="text-sm font-medium transition-colors hover:text-primary">
               Nutrition
             </Link>
+            <Link href="/community" className="text-sm font-medium transition-colors hover:text-primary">
+              Community
+            </Link>
             <Link
               href="/chatbot"
               className="text-sm font-bold text-primary transition-colors hover:text-primary/80 flex items-center gap-1"
@@ -110,6 +113,9 @@ export default function SiteHeader() {
                 </Link>
                 <Link href="/nutrition" className="text-lg font-medium transition-colors hover:text-primary" onClick={() => setIsMenuOpen(false)}>
                   Nutrition
+                </Link>
+                <Link href="/community" className="text-lg font-medium transition-colors hover:text-primary" onClick={() => setIsMenuOpen(false)}>
+                  Community
                 </Link>
                 <Link
                   href="/chatbot"
