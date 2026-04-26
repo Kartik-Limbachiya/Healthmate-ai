@@ -38,7 +38,9 @@ export async function POST(req: Request) {
         sex: data.gender === "female" ? "Female" : (data.gender === "male" ? "Male" : undefined),
         weight: data.weight,
         height: data.height ? data.height / 100 : undefined,
-        goal: data.fitnessGoal
+        goal: data.fitnessGoal,
+        activeMealPlanId: data.activeMealPlanId,
+        nutritionGoals: data.nutritionGoals
       };
     }
 
@@ -94,9 +96,11 @@ General Advice: ${row.recommendation || row.Recommendation}`
     ).join('\n\n');
 
     const promptText = `You are an expert fitness and diet chatbot. You are polite, encouraging, and highly knowledgeable.
-Use the following context from our dataset, the user's explicit profile, the user's logged meals today, and the user's past memory to help answer their question. If the dataset provides specific workouts, diets, or advice for their profile, incorporate them into your answer naturally. Do not explicitly say "the dataset says", but rather "I recommend" or "Based on your focus...". If the dataset context is empty or irrelevant, just provide standard fitness advice. If the user asks what they ate today, refer specifically to "Today's Logged Meals in App Database". Also align your recommendations closely with their "Fitness Goal" (e.g. if weight loss is the goal, recommend lower calories or specific plans that match weight loss).
+Use the following context from our dataset, the user's explicit profile, the user's logged meals today, and the user's past memory to help answer their question. If the dataset provides specific workouts, diets, or advice for their profile, incorporate them into your answer naturally. Do not explicitly say "the dataset says", but rather "I recommend" or "Based on your focus...". If the dataset context is empty or irrelevant, just provide standard fitness advice. If the user asks what they ate today, refer specifically to "Today's Logged Meals in App Database". 
 
-CRITICAL INSTRUCTION: DO NOT use any Markdown formatting whatsoever. Do not use asterisks (* or **) for bold/italics, do not use hashes (#) for headers, and do not use lists. Respond entirely in plain text, using normal paragraph breaks for structure.
+CRITICAL MEAL PLAN INSTRUCTION: You MUST strictly align your food recommendations with the user's "Active Meal Plan" and "Daily Nutrition Targets". If the user is on a "Keto" plan or their carb target is very low, DO NOT recommend high-carb foods like apples, bananas, whole grains, or rice. Recommend keto-friendly foods instead (fats, proteins, low-carb veggies).
+
+CRITICAL FORMATTING INSTRUCTION: DO NOT use any Markdown formatting whatsoever. Do not use asterisks (* or **) for bold/italics, do not use hashes (#) for headers, and do not use lists. Respond entirely in plain text, using normal paragraph breaks for structure.
 
 ---
 User's Real Profile:
@@ -106,6 +110,8 @@ Sex: ${combinedTraits.sex || 'Unknown'}
 Weight: ${combinedTraits.weight ? combinedTraits.weight + 'kg' : 'Unknown'}
 Height: ${combinedTraits.height ? combinedTraits.height + 'm' : 'Unknown'}
 Fitness Goal: ${combinedTraits.goal || 'Unknown'}
+Active Meal Plan: ${combinedTraits.activeMealPlanId || 'None'}
+Daily Nutrition Targets: ${combinedTraits.nutritionGoals ? \`Calories: \${combinedTraits.nutritionGoals.calories}, Protein: \${combinedTraits.nutritionGoals.protein}g, Carbs: \${combinedTraits.nutritionGoals.carbs}g, Fat: \${combinedTraits.nutritionGoals.fat}g\` : 'Unknown'}
 ---
 ${todayMealsContext || "No meals logged yet today."}
 ---
