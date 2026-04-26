@@ -52,7 +52,7 @@ export default function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-primary">
+                <Link href="/community" className="text-gray-400 hover:text-primary">
                   Community Support
                 </Link>
               </li>

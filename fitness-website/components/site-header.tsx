@@ -53,6 +53,9 @@ export default function SiteHeader() {
             <Link href="/blogs" className="text-sm font-medium transition-colors hover:text-primary">
               Blogs
             </Link>
+            <Link href="/community" className="text-sm font-medium transition-colors hover:text-primary">
+              Community
+            </Link>
             <Link
               href="/chatbot"
               className="text-sm font-bold text-primary transition-colors hover:text-primary/80 flex items-center gap-1"
@@ -116,6 +119,9 @@ export default function SiteHeader() {
                 </Link>
                 <Link href="/blogs" className="text-lg font-medium transition-colors hover:text-primary" onClick={() => setIsMenuOpen(false)}>
                   Blogs
+                </Link>
+                <Link href="/community" className="text-lg font-medium transition-colors hover:text-primary" onClick={() => setIsMenuOpen(false)}>
+                  Community
                 </Link>
                 <Link
                   href="/chatbot"
