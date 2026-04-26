@@ -3,6 +3,13 @@
  * No external dependencies required.
  */
 
+// Pre-load voices to avoid the empty-array bug on first load
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    window.speechSynthesis.getVoices();
+  };
+}
+
 let isTTSEnabled = false;
 
 export function setTTSEnabled(enabled: boolean) {
@@ -31,7 +38,7 @@ export function speak(text: string) {
   // Cancel any ongoing speech
   window.speechSynthesis.cancel();
 
-  // Clean up markdown-like formatting for natural speech
+  // Clean up any stray markdown or formatting
   const cleanText = text
     .replace(/[*_#`~]/g, "")
     .replace(/\n{2,}/g, ". ")
@@ -40,9 +47,9 @@ export function speak(text: string) {
 
   if (!cleanText) return;
 
-  // Split into chunks of ~200 chars at sentence boundaries
-  // (SpeechSynthesis can choke on very long text)
-  const chunks = splitIntoChunks(cleanText, 200);
+  // Split into chunks of ~150 chars at sentence boundaries
+  // (SpeechSynthesis can choke on very long text and neural voices prefer shorter chunks)
+  const chunks = splitIntoChunks(cleanText, 150);
 
   chunks.forEach((chunk, index) => {
     const utterance = new SpeechSynthesisUtterance(chunk);
@@ -50,13 +57,16 @@ export function speak(text: string) {
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
 
-    // Try to use a natural-sounding English voice
+    // Prioritize high-quality "Neural" online voices available in Edge/Chrome/Windows
     const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(
-      (v) =>
-        v.lang.startsWith("en") &&
-        (v.name.includes("Google") || v.name.includes("Natural") || v.name.includes("Samantha"))
-    );
+    const preferredVoice = 
+      voices.find(v => v.lang.startsWith("en") && v.name.includes("Aria Online")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.includes("Jenny Online")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.includes("Natural")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.includes("Google US English")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.includes("Samantha")) ||
+      voices.find(v => v.lang.startsWith("en")); // Fallback to any english voice
+
     if (preferredVoice) {
       utterance.voice = preferredVoice;
     }

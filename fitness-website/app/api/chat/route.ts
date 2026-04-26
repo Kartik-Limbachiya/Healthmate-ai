@@ -59,6 +59,8 @@ General Advice: ${row.recommendation || row.Recommendation}`
     const promptText = `You are an expert fitness and diet chatbot. You are polite, encouraging, and highly knowledgeable.
 Use the following context from our dataset and the user's explicit profile to help answer their question. If the dataset provides specific workouts, diets, or advice for their profile, incorporate them into your answer naturally. Do not explicitly say "the dataset says", but rather "I recommend" or "Based on your focus...". If the dataset context is empty or irrelevant, just provide standard fitness advice.
 
+CRITICAL INSTRUCTION: DO NOT use any Markdown formatting whatsoever. Do not use asterisks (* or **) for bold/italics, do not use hashes (#) for headers, and do not use lists. Respond entirely in plain text, using normal paragraph breaks for structure.
+
 ---
 User's Real Profile:
 Name: ${combinedTraits.name || 'Unknown'}
