@@ -147,9 +147,9 @@ function CommunityContent() {
                 <CardFooter className="bg-muted/50 py-3 flex gap-4">
                   <button 
                     onClick={() => handleLikePost(post.id, post.likes || [])}
-                    className={\`flex items-center gap-1.5 text-sm font-medium transition-colors \${isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-foreground'}\`}
+                    className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-foreground'}`}
                   >
-                    <Heart className={\`w-5 h-5 \${isLiked ? 'fill-current' : ''}\`} />
+                    <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
                     <span>{likesCount} {likesCount === 1 ? 'Like' : 'Likes'}</span>
                   </button>
                   <button className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-not-allowed opacity-50" title="Coming soon">
