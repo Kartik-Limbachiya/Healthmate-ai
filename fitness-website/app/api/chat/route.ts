@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { messages, userId, profile } = await req.json();
+    const { messages, userId, profile, clientStartOfDay, clientEndOfDay } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
 
     // --- Build user traits from profile ---
@@ -46,10 +46,9 @@ export async function POST(req: Request) {
     let todayMealsContext = "";
     if (userId) {
       try {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
+        // Use client's timezone boundaries if provided, fallback to server UTC if not
+        const startOfDay = clientStartOfDay ? new Date(clientStartOfDay) : new Date(new Date().setHours(0, 0, 0, 0));
+        const endOfDay = clientEndOfDay ? new Date(clientEndOfDay) : new Date(new Date().setHours(23, 59, 59, 999));
 
         const mealsRef = collection(db, "meals");
         const q = query(

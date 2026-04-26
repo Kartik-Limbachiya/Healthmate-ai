@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Volume2, VolumeX } from "lucide-react";
+import { Send, Bot, User, Loader2, Volume2, VolumeX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AuthGuard from "@/lib/auth-guard";
 import { useAuth } from "@/lib/auth-context";
@@ -9,15 +9,39 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase-config";
 import { speak, stopSpeaking, setTTSEnabled, getTTSEnabled } from "@/lib/tts-utils";
 
+const INITIAL_MESSAGE = { role: "assistant", content: "Hi there! I am your AI HealthMate. Tell me about your age, weight, height, and fitness goals, and I'll find a personalized regimen for you!" };
+
 function ChatbotContent() {
   const { user, getIdToken } = useAuth();
-  const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hi there! I am your AI HealthMate. Tell me about your age, weight, height, and fitness goals, and I'll find a personalized regimen for you!" }
-  ]);
+  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [ttsEnabled, setTtsState] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load chat history from localStorage
+  useEffect(() => {
+    if (user) {
+      const saved = localStorage.getItem(`chat_${user.uid}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.length > 0) {
+            setMessages(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to parse chat history");
+        }
+      }
+    }
+  }, [user]);
+
+  // Save chat history to localStorage whenever messages change
+  useEffect(() => {
+    if (user && messages.length > 0) {
+      localStorage.setItem(`chat_${user.uid}`, JSON.stringify(messages));
+    }
+  }, [messages, user]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -32,6 +56,13 @@ function ChatbotContent() {
     setTtsState(newState);
     setTTSEnabled(newState);
     if (!newState) stopSpeaking();
+  };
+
+  const clearChat = () => {
+    if (confirm("Are you sure you want to clear the chat history?")) {
+      setMessages([INITIAL_MESSAGE]);
+      if (user) localStorage.removeItem(`chat_${user.uid}`);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,6 +92,11 @@ function ChatbotContent() {
       // Get Firebase ID token for server-side auth
       const idToken = await getIdToken();
 
+      // Get local timezone start/end of day for accurate database querying
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -71,6 +107,8 @@ function ChatbotContent() {
           messages: newMessages,
           userId: user?.uid,
           profile: profileData,
+          clientStartOfDay: startOfDay.toISOString(),
+          clientEndOfDay: endOfDay.toISOString(),
         }),
       });
 
@@ -116,15 +154,24 @@ function ChatbotContent() {
           <Bot className="h-8 w-8 text-primary" />
           <h1 className="text-3xl font-bold">HealthMate AI Coach</h1>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleTTS}
-          title={ttsEnabled ? "Disable text-to-speech" : "Enable text-to-speech"}
-          className="shrink-0"
-        >
-          {ttsEnabled ? <Volume2 className="h-5 w-5 text-primary" /> : <VolumeX className="h-5 w-5" />}
-        </Button>
+        <div className="flex gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={clearChat}
+            title="Clear Chat History"
+          >
+            <Trash2 className="h-5 w-5 text-muted-foreground" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleTTS}
+            title={ttsEnabled ? "Disable text-to-speech" : "Enable text-to-speech"}
+          >
+            {ttsEnabled ? <Volume2 className="h-5 w-5 text-primary" /> : <VolumeX className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 bg-card border rounded-lg shadow-sm flex flex-col overflow-hidden">
@@ -186,3 +233,4 @@ export default function ChatbotPage() {
     </AuthGuard>
   );
 }
+
