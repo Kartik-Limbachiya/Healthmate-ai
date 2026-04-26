@@ -97,6 +97,22 @@ function ChatbotContent() {
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
       const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
+      // Fetch today's meals directly on the client to avoid backend index/timezone mismatches
+      let todaysMeals: any[] = [];
+      try {
+        const { collection, query, where, getDocs, Timestamp } = await import("firebase/firestore");
+        const q = query(
+          collection(db, "meals"),
+          where("userId", "==", user.uid),
+          where("date", ">=", Timestamp.fromDate(startOfDay)),
+          where("date", "<=", Timestamp.fromDate(endOfDay))
+        );
+        const querySnapshot = await getDocs(q);
+        todaysMeals = querySnapshot.docs.map(doc => doc.data());
+      } catch (err) {
+        console.error("Client side meals fetch failed:", err);
+      }
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -107,8 +123,7 @@ function ChatbotContent() {
           messages: newMessages,
           userId: user?.uid,
           profile: profileData,
-          clientStartOfDay: startOfDay.toISOString(),
-          clientEndOfDay: endOfDay.toISOString(),
+          todaysMeals,
         }),
       });
 

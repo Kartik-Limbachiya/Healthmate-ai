@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { messages, userId, profile, clientStartOfDay, clientEndOfDay } = await req.json();
+    const { messages, userId, profile, todaysMeals } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
 
     // --- Build user traits from profile ---
@@ -42,38 +42,17 @@ export async function POST(req: Request) {
       };
     }
 
-    // --- Fetch Today's Logged Meals from Firebase ---
+    // --- Format Today's Logged Meals from Client Payload ---
     let todayMealsContext = "";
-    if (userId) {
-      try {
-        // Use client's timezone boundaries if provided, fallback to server UTC if not
-        const startOfDay = clientStartOfDay ? new Date(clientStartOfDay) : new Date(new Date().setHours(0, 0, 0, 0));
-        const endOfDay = clientEndOfDay ? new Date(clientEndOfDay) : new Date(new Date().setHours(23, 59, 59, 999));
-
-        const mealsRef = collection(db, "meals");
-        const q = query(
-          mealsRef,
-          where("userId", "==", userId),
-          where("date", ">=", Timestamp.fromDate(startOfDay)),
-          where("date", "<=", Timestamp.fromDate(endOfDay))
-        );
-
-        const querySnapshot = await getDocs(q);
-        const meals = querySnapshot.docs.map(doc => doc.data());
-        
-        if (meals.length > 0) {
-          todayMealsContext = "Today's Logged Meals in App Database:\n";
-          meals.forEach((meal: any) => {
-            todayMealsContext += `- ${meal.name} at ${meal.time}: `;
-            if (meal.items && Array.isArray(meal.items)) {
-              todayMealsContext += meal.items.map((i: any) => `${i.quantity}x ${i.name} (${Math.round(i.calories * i.quantity)} cal)`).join(', ');
-            }
-            todayMealsContext += '\n';
-          });
+    if (todaysMeals && Array.isArray(todaysMeals) && todaysMeals.length > 0) {
+      todayMealsContext = "Today's Logged Meals in App Database:\n";
+      todaysMeals.forEach((meal: any) => {
+        todayMealsContext += `- ${meal.name} at ${meal.time}: `;
+        if (meal.items && Array.isArray(meal.items)) {
+          todayMealsContext += meal.items.map((i: any) => `${i.quantity}x ${i.name} (${Math.round(i.calories * i.quantity)} cal)`).join(', ');
         }
-      } catch (err) {
-        console.error("Error fetching meals:", err);
-      }
+        todayMealsContext += '\n';
+      });
     }
 
     // --- Mem0 Integration: Save and Search Memory ---
