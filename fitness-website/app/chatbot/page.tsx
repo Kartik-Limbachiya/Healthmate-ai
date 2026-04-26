@@ -1,20 +1,23 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2 } from "lucide-react";
-import { auth, db } from "@/firebase-config";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { Send, Bot, User, Loader2, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AuthGuard from "@/lib/auth-guard";
+import { useAuth } from "@/lib/auth-context";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/firebase-config";
+import { speak, stopSpeaking, setTTSEnabled, getTTSEnabled } from "@/lib/tts-utils";
 
-export default function ChatbotPage() {
+function ChatbotContent() {
+  const { user, getIdToken } = useAuth();
   const [messages, setMessages] = useState([
     { role: "assistant", content: "Hi there! I am your AI HealthMate. Tell me about your age, weight, height, and fitness goals, and I'll find a personalized regimen for you!" }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [ttsEnabled, setTtsState] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [userId, setUserId] = useState<string | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,12 +27,12 @@ export default function ChatbotPage() {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUserId(user ? user.uid : null);
-    });
-    return () => unsubscribe();
-  }, []);
+  const toggleTTS = () => {
+    const newState = !ttsEnabled;
+    setTtsState(newState);
+    setTTSEnabled(newState);
+    if (!newState) stopSpeaking();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,10 +45,11 @@ export default function ChatbotPage() {
     setIsLoading(true);
 
     try {
+      // Fetch profile data if authenticated
       let profileData = null;
-      if (userId) {
+      if (user) {
         try {
-          const userDoc = await getDoc(doc(db, "users", userId));
+          const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             profileData = userDoc.data();
           }
@@ -54,38 +58,48 @@ export default function ChatbotPage() {
         }
       }
 
+      // Get Firebase ID token for server-side auth
+      const idToken = await getIdToken();
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           messages: newMessages,
-          userId: userId,
-          profile: profileData
+          userId: user?.uid,
+          profile: profileData,
         }),
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
-        // Handle when google API throws a deeply nested JSON error object
         const errMsg = typeof data.error === 'object' ? JSON.stringify(data.error) : data.error;
         throw new Error(errMsg || "Failed to get response");
       }
+
       setMessages((prev) => [...prev, data]);
+
+      // Speak the response if TTS is enabled
+      if (ttsEnabled && data.content) {
+        speak(data.content);
+      }
     } catch (error: any) {
       console.error(error);
-      
+
       let errorText = "Sorry, I am having trouble connecting to the server. Please try again later.";
-      
-      // Check for Gemini API quota limits
-      if (error.message.includes('429') || error.message.includes('Quota') || error.message.includes('exceeded')) {
-        errorText = "API Rate Limit Exceeded: The Google Gemini API key has run out of its free quota. Please wait a minute or upgrade your billing details.";
+
+      if (error.message?.includes('429') || error.message?.includes('Quota') || error.message?.includes('exceeded')) {
+        errorText = "API Rate Limit Exceeded. The system will automatically try a backup AI provider on your next message.";
+      } else if (error.message?.includes('401')) {
+        errorText = "Authentication required. Please log in to use the AI Coach.";
       } else if (error.message) {
         errorText = `Error: ${error.message}`;
       }
-      
+
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: errorText }
@@ -97,11 +111,22 @@ export default function ChatbotPage() {
 
   return (
     <div className="container py-8 max-w-4xl mx-auto flex flex-col h-[calc(100vh-4rem)]">
-      <div className="flex items-center space-x-2 mb-6">
-        <Bot className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold">HealthMate AI Coach</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-2">
+          <Bot className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold">HealthMate AI Coach</h1>
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={toggleTTS}
+          title={ttsEnabled ? "Disable text-to-speech" : "Enable text-to-speech"}
+          className="shrink-0"
+        >
+          {ttsEnabled ? <Volume2 className="h-5 w-5 text-primary" /> : <VolumeX className="h-5 w-5" />}
+        </Button>
       </div>
-      
+
       <div className="flex-1 bg-card border rounded-lg shadow-sm flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {messages.map((msg, index) => (
@@ -132,7 +157,7 @@ export default function ChatbotPage() {
           )}
           <div ref={messagesEndRef} />
         </div>
-        
+
         <div className="p-4 border-t bg-background">
           <form onSubmit={handleSubmit} className="flex gap-2 relative">
             <input
@@ -151,5 +176,13 @@ export default function ChatbotPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatbotPage() {
+  return (
+    <AuthGuard>
+      <ChatbotContent />
+    </AuthGuard>
   );
 }

@@ -2,51 +2,28 @@
 
 import Link from "next/link";
 import { Menu, Activity, ChevronDown, Bot } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-
-// Firebase imports
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "@/firebase-config";
+import { useAuth } from "@/lib/auth-context";
+import { auth } from "@/firebase-config";
 
 export default function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const router = useRouter();
+  const { user, profile } = useAuth();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (!currentUser) {
-        setUserName(null);
-      } else {
-        try {
-          const docRef = doc(db, "users", currentUser.uid);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            setUserName(docSnap.data().name);
-          } else {
-            setUserName(currentUser.displayName || null);
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setUserName(currentUser.displayName || null);
-        }
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+  const userName = profile?.name || user?.displayName || null;
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setUserName(null);
-      // Redirect to main page after logout
+      setShowUserMenu(false);
       router.push("/");
     } catch (error) {
       console.error("Logout error:", error);
@@ -67,16 +44,10 @@ export default function SiteHeader() {
             </div>
           </Link>
           <nav className="hidden md:flex gap-6">
-            <Link
-              href="/workouts"
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
+            <Link href="/workouts" className="text-sm font-medium transition-colors hover:text-primary">
               Workouts
             </Link>
-            <Link
-              href="/nutrition"
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
+            <Link href="/nutrition" className="text-sm font-medium transition-colors hover:text-primary">
               Nutrition
             </Link>
             <Link
@@ -86,10 +57,7 @@ export default function SiteHeader() {
               <Bot className="h-4 w-4" />
               AI Coach
             </Link>
-            <Link
-              href="/profile"
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
+            <Link href="/profile" className="text-sm font-medium transition-colors hover:text-primary">
               Profile
             </Link>
           </nav>
@@ -107,10 +75,10 @@ export default function SiteHeader() {
                   <ChevronDown className="h-4 w-4" />
                 </button>
                 {showUserMenu && (
-                  <div className="absolute right-0 top-full mt-1 w-32 bg-white border rounded shadow-lg z-10">
+                  <div className="absolute right-0 top-full mt-1 w-32 bg-white dark:bg-gray-800 border rounded shadow-lg z-10">
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-red-500 bg-white border rounded shadow-sm hover:bg-gray-100"
+                      className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                     >
                       Logout
                     </button>
@@ -137,18 +105,10 @@ export default function SiteHeader() {
             </SheetTrigger>
             <SheetContent side="right">
               <div className="flex flex-col gap-4 mt-8">
-                <Link
-                  href="/workouts"
-                  className="text-lg font-medium transition-colors hover:text-primary"
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <Link href="/workouts" className="text-lg font-medium transition-colors hover:text-primary" onClick={() => setIsMenuOpen(false)}>
                   Workouts
                 </Link>
-                <Link
-                  href="/nutrition"
-                  className="text-lg font-medium transition-colors hover:text-primary"
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <Link href="/nutrition" className="text-lg font-medium transition-colors hover:text-primary" onClick={() => setIsMenuOpen(false)}>
                   Nutrition
                 </Link>
                 <Link
@@ -159,11 +119,7 @@ export default function SiteHeader() {
                   <Bot className="h-5 w-5" />
                   AI Coach
                 </Link>
-                <Link
-                  href="/profile"
-                  className="text-lg font-medium transition-colors hover:text-primary"
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <Link href="/profile" className="text-lg font-medium transition-colors hover:text-primary" onClick={() => setIsMenuOpen(false)}>
                   Profile
                 </Link>
                 <div className="flex flex-col gap-2 mt-4">
@@ -173,21 +129,17 @@ export default function SiteHeader() {
                         setIsMenuOpen(false);
                         handleLogout();
                       }}
-                      className="px-4 py-2 text-lg font-medium text-red-500 bg-white border rounded shadow-sm hover:bg-gray-100"
+                      className="px-4 py-2 text-lg font-medium text-red-500 bg-white dark:bg-gray-800 border rounded shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       Logout
                     </button>
                   ) : (
                     <>
                       <Button variant="outline" asChild>
-                        <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                          Login
-                        </Link>
+                        <Link href="/login" onClick={() => setIsMenuOpen(false)}>Login</Link>
                       </Button>
                       <Button asChild>
-                        <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
-                          Sign Up
-                        </Link>
+                        <Link href="/signup" onClick={() => setIsMenuOpen(false)}>Sign Up</Link>
                       </Button>
                     </>
                   )}

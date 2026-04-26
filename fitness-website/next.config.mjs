@@ -1,42 +1,23 @@
-let userConfig = undefined;
-try {
-  userConfig = await import('./v0-user-next.config');
-} catch (e) {
-  // ignore error if file not found
-}
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Removed `output: 'export'` to enable SSR for dynamic routes
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true, // Optional: remove this if using <Image> component properly
+    unoptimized: true,
+  },
+  // Exclude server-only packages from client bundle
+  serverExternalPackages: ['firebase-admin'],
+  // Tree-shake heavy libraries — only import what's used
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'recharts',
+      'date-fns',
+      'framer-motion',
+      '@radix-ui/react-icons',
+    ],
   },
 };
-
-mergeConfig(nextConfig, userConfig);
-
-function mergeConfig(nextConfig, userConfig) {
-  if (!userConfig) return;
-
-  for (const key in userConfig) {
-    if (
-      typeof nextConfig[key] === 'object' &&
-      !Array.isArray(nextConfig[key])
-    ) {
-      nextConfig[key] = {
-        ...nextConfig[key],
-        ...userConfig[key],
-      };
-    } else {
-      nextConfig[key] = userConfig[key];
-    }
-  }
-}
 
 export default nextConfig;

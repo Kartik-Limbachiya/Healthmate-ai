@@ -4,42 +4,16 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowRight, Activity } from "lucide-react"
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth"
-import { doc, getDoc, setDoc } from "firebase/firestore"
-import { ref as rtdbRef, set as rtdbSet } from "firebase/database"
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { auth, db, rtdb } from "@/firebase-config"
+import { auth } from "@/firebase-config"
+import { ensureUserProfile } from "@/lib/user-utils"
 
 const provider = new GoogleAuthProvider()
-
-async function ensureUserProfile(user: User) {
-  const userDocRef = doc(db, "users", user.uid)
-  const userDoc = await getDoc(userDocRef)
-  const name = user.displayName || user.email?.split("@")[0] || "Athlete"
-
-  if (!userDoc.exists()) {
-    await setDoc(userDocRef, {
-      name,
-      email: user.email,
-      createdAt: new Date(),
-      workoutsCompleted: 0,
-      caloriesBurned: 0,
-      streak: 0,
-      weeklyGoal: 5,
-      calorieGoal: 2500,
-      weightLoss: 0,
-    })
-  }
-
-  await rtdbSet(rtdbRef(rtdb, `users/${user.uid}`), {
-    name,
-    email: user.email,
-  })
-}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -167,4 +141,3 @@ export default function LoginPage() {
     </div>
   )
 }
-

@@ -2,55 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
-  User,
-} from "firebase/auth";
-import { setDoc, doc, getDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { setDoc, doc } from "firebase/firestore";
 import { ref, set as rtdbSet } from "firebase/database";
 import Link from "next/link";
 import { ArrowRight, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  CardDescription,
+  Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { auth, db, rtdb } from "@/firebase-config";
+import { ensureUserProfile } from "@/lib/user-utils";
 
 const provider = new GoogleAuthProvider();
-
-async function ensureUserProfile(user: User, fallbackName?: string) {
-  const name = user.displayName || fallbackName || user.email?.split("@")[0] || "Athlete";
-  const userDocRef = doc(db, "users", user.uid);
-  const userDoc = await getDoc(userDocRef);
-
-  if (!userDoc.exists()) {
-    await setDoc(userDocRef, {
-      name,
-      email: user.email,
-      createdAt: new Date(),
-      workoutsCompleted: 0,
-      caloriesBurned: 0,
-      streak: 0,
-      weeklyGoal: 5,
-      calorieGoal: 2500,
-      weightLoss: 0,
-    });
-  }
-
-  await rtdbSet(ref(rtdb, `users/${user.uid}`), {
-    name,
-    email: user.email,
-  });
-}
 
 export default function SignupPage() {
   const router = useRouter();
@@ -78,6 +44,7 @@ export default function SignupPage() {
       const user = result.user;
       const name = baseName || email.split("@")[0];
 
+      // Create user profile in Firestore and RTDB
       await setDoc(doc(db, "users", user.uid), {
         name,
         email,
@@ -99,13 +66,13 @@ export default function SignupPage() {
     } catch (error: any) {
       console.error("Signup error:", error);
       let errorMessage = error.message || "Unable to create account. Try again later.";
-      
+
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "Email already in use. Please go to Login. (If you just got a permissions error, your auth account was created but your database profile wasn't. Please delete the auth user in Firebase Console or try a different email.)";
+        errorMessage = "Email already in use. Please go to Login.";
       } else if (errorMessage.toLowerCase().includes('missing or insufficient permissions')) {
-        errorMessage = "Database Permissions Denied! 🛑 YOU MUST FIX YOUR FIREBASE RULES: Go to Firebase Console -> Firestore Database -> Rules, and set 'allow read, write: if request.auth != null;'. Then delete this email from the Auth tab and try again.";
+        errorMessage = "Database Permissions Denied! Please check your Firebase rules in the console.";
       }
-      
+
       setError(errorMessage);
     } finally {
       setLoading(false);

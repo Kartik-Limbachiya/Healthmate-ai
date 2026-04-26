@@ -125,15 +125,12 @@ export default function NutritionTracking() {
   // 1. Authentication and Initial Data Fetch
   // ------------------------------------------------------------------
   useEffect(() => {
-    console.log("Setting up auth listener..."); // Log setup
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        console.log("Auth state changed: User logged in", user.uid); // Log login
         setUserId(user.uid);
         await fetchUserData(user.uid);
         await fetchMealsForDate(user.uid, selectedDate);
       } else {
-        console.log("Auth state changed: User logged out"); // Log logout
         setUserId(null);
         setMeals([]);
         setDailyGoals(DEFAULT_GOALS);
@@ -143,49 +140,37 @@ export default function NutritionTracking() {
         setWeeklyData({});
       }
     });
-    return () => {
-        console.log("Cleaning up auth listener."); // Log cleanup
-        unsubscribe();
-    }
+    return () => unsubscribe();
   }, []); // Run only once on mount
 
   // ------------------------------------------------------------------
   // 2. Fetch User Goals and Active Plan
   // ------------------------------------------------------------------
   const fetchUserData = async (uid: string) => {
-    // Keep setLoading(true) here if you want goals loading state
-    // setLoading(true);
-    console.log(`fetchUserData: Fetching goals for user ${uid}`);
+
     try {
       const userDocRef = doc(db, "users", uid);
       const userDoc = await getDoc(userDocRef);
 
       if (userDoc.exists()) {
         const data = userDoc.data();
-        console.log("fetchUserData: User doc exists, data:", data);
         if (data.nutritionGoals) {
-          console.log("fetchUserData: Found nutritionGoals:", data.nutritionGoals);
           setDailyGoals(data.nutritionGoals);
           setTempGoals(data.nutritionGoals);
         } else {
-          console.log("fetchUserData: No nutritionGoals found, setting defaults.");
           setDailyGoals(DEFAULT_GOALS);
           setTempGoals(DEFAULT_GOALS);
           await setDoc(userDocRef, { nutritionGoals: DEFAULT_GOALS }, { merge: true });
-          console.log("fetchUserData: Saved default goals to Firestore.");
         }
         setActiveMealPlanId(data.activeMealPlanId || null);
-        console.log("fetchUserData: Active plan ID:", data.activeMealPlanId || null);
       } else {
-         console.warn("fetchUserData: User document not found, creating one.");
          setDailyGoals(DEFAULT_GOALS);
          setTempGoals(DEFAULT_GOALS);
          await setDoc(doc(db, "users", uid), {
              nutritionGoals: DEFAULT_GOALS,
-             createdAt: Timestamp.now() // Add createdAt field if creating doc
+             createdAt: Timestamp.now()
             }, { merge: true });
          setActiveMealPlanId(null);
-         console.log("fetchUserData: Created user doc with default goals.");
       }
     } catch (error) {
       console.error("fetchUserData: Error fetching user data:", error);
@@ -193,7 +178,7 @@ export default function NutritionTracking() {
       setDailyGoals(DEFAULT_GOALS);
       setTempGoals(DEFAULT_GOALS);
     }
-    // setLoading(false); // Move setLoading(false) to fetchMealsForDate's finally block
+
   };
 
   // ------------------------------------------------------------------
@@ -201,13 +186,11 @@ export default function NutritionTracking() {
   // ------------------------------------------------------------------
   const fetchMealsForDate = async (uid: string | null, date: Date) => {
     if (!uid) {
-      console.log("fetchMealsForDate: No userId provided.");
-      setMeals([]); // Clear meals if no user
-      setLoading(false); // Ensure loading is off if no user
+      setMeals([]);
+      setLoading(false);
       return;
     }
     setLoading(true);
-    console.log(`fetchMealsForDate: Fetching for user ${uid} on date ${format(date, "yyyy-MM-dd")}`);
 
     try {
       const startOfDay = new Date(date);
@@ -216,14 +199,13 @@ export default function NutritionTracking() {
       endOfDay.setHours(23, 59, 59, 999);
 
       const mealsRef = collection(db, "meals");
-      // Use the corrected query with the required index (userId ASC, date ASC, createdAt ASC)
       const q = query(
         mealsRef,
         where("userId", "==", uid),
         where("date", ">=", Timestamp.fromDate(startOfDay)),
         where("date", "<=", Timestamp.fromDate(endOfDay)),
-        orderBy("date", "asc"), // Order by date first (needed for the index)
-        orderBy("createdAt", "asc") // Then order by creation time
+        orderBy("date", "asc"),
+        orderBy("createdAt", "asc")
       );
 
       const querySnapshot = await getDocs(q);
@@ -233,29 +215,23 @@ export default function NutritionTracking() {
           date: docSnap.data().date?.toDate() || new Date(),
       }));
 
-      // Secondary sort by time string (client-side) as Firestore might group by timestamp seconds
       fetchedMeals.sort((a, b) => a.time.localeCompare(b.time));
 
-      console.log("fetchMealsForDate: Fetched meals data:", JSON.stringify(fetchedMeals, null, 2));
-
       setMeals(fetchedMeals);
-      console.log("fetchMealsForDate: setMeals called.");
 
-    } catch (error: any) { // Catch specific Firebase error
+    } catch (error: any) {
       console.error("fetchMealsForDate: Error fetching meals:", error);
       // Check if it's the index error
       if (error.code === 'failed-precondition' && error.message.includes('index')) {
-          console.error("Firestore Index Missing: Please create the required composite index in your Firebase console.");
           toast.error("Database setup needed. Please contact support.", {
               description: "A required index is missing for fetching meals efficiently."
           });
       } else {
           toast.error(`Could not fetch meals for ${format(date, "PPP")}.`);
       }
-      setMeals([]); // Clear meals on error
+      setMeals([]);
     } finally {
       setLoading(false);
-      console.log("fetchMealsForDate: Fetch complete, loading set to false.");
     }
   };
 
@@ -263,7 +239,6 @@ export default function NutritionTracking() {
   // 4. Recalculate Daily Totals When Meals Change
   // ------------------------------------------------------------------
   useEffect(() => {
-    console.log("useEffect [meals]: Recalculating totals. Current meals:", JSON.stringify(meals, null, 2));
 
     const totals = meals.reduce(
       (acc, meal) => {
@@ -279,10 +254,7 @@ export default function NutritionTracking() {
       { calories: 0, protein: 0, carbs: 0, fat: 0 }
     );
 
-    console.log("useEffect [meals]: Calculated totals:", totals);
-
     setDailyTotals(totals);
-    console.log("useEffect [meals]: setDailyTotals called.");
 
   }, [meals]);
 
@@ -291,10 +263,7 @@ export default function NutritionTracking() {
   // ------------------------------------------------------------------
   useEffect(() => {
     if (userId) {
-       console.log(`useEffect [selectedDate, userId]: Date or user changed. Refetching meals for ${format(selectedDate, "yyyy-MM-dd")}.`);
       fetchMealsForDate(userId, selectedDate);
-    } else {
-        console.log("useEffect [selectedDate, userId]: userId is null, skipping fetch.");
     }
   }, [selectedDate, userId]);
 
@@ -304,15 +273,12 @@ export default function NutritionTracking() {
   const fetchWeeklyData = async (weekStart: Date) => {
     if (!userId) return;
     setWeeklyLoading(true);
-    console.log(`fetchWeeklyData: Fetching for week starting ${format(weekStart, "yyyy-MM-dd")}`);
 
     const weekEnd = endOfWeek(weekStart);
     const dateMap: Record<string, NutritionGoals> = {};
 
     try {
         const mealsRef = collection(db, "meals");
-        // Ensure this query also has a corresponding index if needed, or simplify it.
-        // Index: userId ASC, date ASC
         const q = query(
             mealsRef,
             where("userId", "==", userId),
@@ -322,7 +288,6 @@ export default function NutritionTracking() {
         );
 
         const querySnapshot = await getDocs(q);
-        console.log(`fetchWeeklyData: Found ${querySnapshot.docs.length} meals for the week.`);
 
         querySnapshot.forEach((docSnap) => {
             const mealData = docSnap.data();
@@ -345,12 +310,10 @@ export default function NutritionTracking() {
             }
         });
 
-        console.log("fetchWeeklyData: Processed weekly data:", dateMap);
         setWeeklyData(dateMap);
     } catch (error: any) {
         console.error("fetchWeeklyData: Error fetching weekly data:", error);
          if (error.code === 'failed-precondition' && error.message.includes('index')) {
-             console.error("Firestore Index Missing: Please create the required composite index for weekly view (userId ASC, date ASC).");
              toast.error("Database setup needed for weekly view.", {
                  description: "A required index is missing."
              });
@@ -359,7 +322,6 @@ export default function NutritionTracking() {
          }
     } finally {
         setWeeklyLoading(false);
-        console.log("fetchWeeklyData: Fetch complete.");
     }
   };
 
@@ -488,10 +450,9 @@ export default function NutritionTracking() {
   // 10. Helpers for Progress Bars (Keep as is)
   // ------------------------------------------------------------------
   const getProgress = (value: number, goal: number): number => {
-    if (!goal || goal <= 0 || isNaN(goal) || isNaN(value)) return 0; // More robust check
-    // Allow progress > 100 visually up to 150%, but cap calculation at 100 for display %
+    if (!goal || goal <= 0 || isNaN(goal) || isNaN(value)) return 0;
     const calculatedProgress = Math.round((value / goal) * 100);
-    return Math.min(calculatedProgress, 100); // Value for display % capped at 100
+    return Math.min(calculatedProgress, 100);
   };
 
   const getProgressValueForBar = (value: number, goal: number): number => {
@@ -643,7 +604,7 @@ export default function NutritionTracking() {
               <CardContent>
                 <div className="text-2xl font-bold">{Math.round(dailyTotals.calories)} / {dailyGoals.calories}</div>
                 <Progress
-                  value={(() => { const v = getProgressValueForBar(dailyTotals.calories, dailyGoals.calories); console.log(`Render PBar Cal: ${v}`); return v; })()}
+                  value={getProgressValueForBar(dailyTotals.calories, dailyGoals.calories)}
                   className={`h-2 mt-2 ${getProgressColor(dailyTotals.calories, dailyGoals.calories)}`}
                 />
                 <div className="text-xs text-muted-foreground mt-1">{getProgress(dailyTotals.calories, dailyGoals.calories)}% of goal</div>
@@ -655,7 +616,7 @@ export default function NutritionTracking() {
               <CardContent>
                 <div className="text-2xl font-bold">{Math.round(dailyTotals.protein)}g / {dailyGoals.protein}g</div>
                 <Progress
-                  value={(() => { const v = getProgressValueForBar(dailyTotals.protein, dailyGoals.protein); console.log(`Render PBar Pro: ${v}`); return v; })()}
+                  value={getProgressValueForBar(dailyTotals.protein, dailyGoals.protein)}
                   className={`h-2 mt-2 ${getProgressColor(dailyTotals.protein, dailyGoals.protein)}`}
                 />
                 <div className="text-xs text-muted-foreground mt-1">{getProgress(dailyTotals.protein, dailyGoals.protein)}% of goal</div>
@@ -667,7 +628,7 @@ export default function NutritionTracking() {
               <CardContent>
                 <div className="text-2xl font-bold">{Math.round(dailyTotals.carbs)}g / {dailyGoals.carbs}g</div>
                 <Progress
-                  value={(() => { const v = getProgressValueForBar(dailyTotals.carbs, dailyGoals.carbs); console.log(`Render PBar Carb: ${v}`); return v; })()}
+                  value={getProgressValueForBar(dailyTotals.carbs, dailyGoals.carbs)}
                   className={`h-2 mt-2 ${getProgressColor(dailyTotals.carbs, dailyGoals.carbs)}`}
                 />
                 <div className="text-xs text-muted-foreground mt-1">{getProgress(dailyTotals.carbs, dailyGoals.carbs)}% of goal</div>
@@ -679,7 +640,7 @@ export default function NutritionTracking() {
               <CardContent>
                 <div className="text-2xl font-bold">{Math.round(dailyTotals.fat)}g / {dailyGoals.fat}g</div>
                 <Progress
-                  value={(() => { const v = getProgressValueForBar(dailyTotals.fat, dailyGoals.fat); console.log(`Render PBar Fat: ${v}`); return v; })()}
+                  value={getProgressValueForBar(dailyTotals.fat, dailyGoals.fat)}
                   className={`h-2 mt-2 ${getProgressColor(dailyTotals.fat, dailyGoals.fat)}`}
                  />
                 <div className="text-xs text-muted-foreground mt-1">{getProgress(dailyTotals.fat, dailyGoals.fat)}% of goal</div>
@@ -691,11 +652,9 @@ export default function NutritionTracking() {
           <Card>
             <CardHeader>
                 <CardTitle>Meals for {format(selectedDate, "PPP")}</CardTitle>
-                {/* Show loader only when fetching specifically */}
                 {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
             </CardHeader>
             <CardContent>
-              {/* Conditional Rendering based on loading and meals length */}
               {!loading && meals.length === 0 && (
                 <div className="text-center py-8">
                   <Utensils className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -706,11 +665,9 @@ export default function NutritionTracking() {
                   </Button>
                 </div>
               )}
-              {/* Only map if meals exist */}
               {meals.length > 0 && (
                   <div className="space-y-4">
                       {meals.map((meal) => {
-                          // Calculate meal totals safely
                           const mealTotals = (meal.items || []).reduce(
                               (acc, item) => ({
                                   calories: acc.calories + (item.calories || 0) * (item.quantity || 1),
@@ -722,7 +679,8 @@ export default function NutritionTracking() {
 
                           return (
                               <div key={meal.id} className="border rounded-lg p-4 transition-colors hover:bg-muted/30">
-                                  {/* Meal Header */}
+
+
                                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
                                       <div>
                                           <h3 className="font-medium">{meal.name}</h3>
@@ -735,7 +693,6 @@ export default function NutritionTracking() {
                                           </div>
                                       </div>
                                   </div>
-                                  {/* Meal Items */}
                                   {(meal.items || []).length > 0 && (
                                       <div className="space-y-1 mt-3 border-t pt-3">
                                           {meal.items.map((item, index) => (
@@ -746,7 +703,6 @@ export default function NutritionTracking() {
                                           ))}
                                       </div>
                                   )}
-                                  {/* Delete Button */}
                                   <div className="flex justify-end mt-3">
                                       <Button variant="ghost" size="sm" onClick={() => handleDeleteMeal(meal.id)} className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 px-2">
                                           Delete
@@ -758,7 +714,6 @@ export default function NutritionTracking() {
                   </div>
               )}
             </CardContent>
-            {/* Add Another Meal Footer (only if meals exist) */}
             {meals.length > 0 && (
                 <CardFooter>
                     <Button className="w-full" onClick={() => setAddMealOpen(true)} disabled={!userId}>

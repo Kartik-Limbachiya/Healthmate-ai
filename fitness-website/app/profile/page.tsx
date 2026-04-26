@@ -1,46 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileDashboard from "@/components/profile-dashboard";
 import WorkoutHistory from "@/components/workout-history";
 import NutritionTracking from "@/components/nutrition-tracking";
 import ProfileSettings from "@/components/profile-settings";
+import AuthGuard from "@/lib/auth-guard";
+import { useAuth } from "@/lib/auth-context";
 
-// Import Firebase services from firebase-config.js
-import { auth, db } from "@/firebase-config";
-
-export default function ProfilePage() {
-  const router = useRouter();
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (!currentUser) {
-        router.push("/login");
-        return;
-      }
-      try {
-        const docRef = doc(db, "users", currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
-        } else {
-          // Fallback to auth displayName if no Firestore document exists
-          setUserData({ name: currentUser.displayName });
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setLoading(false);
-      }
-    });
-    return () => unsubscribe();
-  }, [router]);
+function ProfileContent() {
+  const { profile, loading } = useAuth();
 
   if (loading) {
     return <div className="p-4 text-center">Loading your profile...</div>;
@@ -57,7 +26,7 @@ export default function ProfilePage() {
           <TabsTrigger value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard">
-          <ProfileDashboard userData={userData} />
+          <ProfileDashboard userData={profile} />
         </TabsContent>
         <TabsContent value="workouts">
           <WorkoutHistory />
@@ -70,5 +39,13 @@ export default function ProfilePage() {
         </TabsContent>
       </Tabs>
     </main>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <AuthGuard>
+      <ProfileContent />
+    </AuthGuard>
   );
 }
