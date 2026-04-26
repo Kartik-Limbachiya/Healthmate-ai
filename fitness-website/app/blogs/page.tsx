@@ -34,6 +34,7 @@ interface Blog {
   title: string;
   content: string;
   imageUrl?: string;
+  imageUrls?: string[];
   createdAt: Timestamp;
   likes: string[];
   ratings: Rating[];
@@ -76,7 +77,7 @@ function BlogsContent() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Interaction State
@@ -102,8 +103,8 @@ function BlogsContent() {
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+    if (e.target.files) {
+      setSelectedFiles(Array.from(e.target.files));
     }
   };
 
@@ -125,9 +126,9 @@ function BlogsContent() {
 
     setIsSubmitting(true);
     try {
-      let imageUrl = "";
-      if (selectedFile) {
-        imageUrl = await uploadImage(selectedFile);
+      let uploadedUrls: string[] = [];
+      if (selectedFiles.length > 0) {
+        uploadedUrls = await Promise.all(selectedFiles.map(file => uploadImage(file)));
       }
 
       const authorName = profile?.name || user.displayName || "Fitness Enthusiast";
@@ -137,7 +138,7 @@ function BlogsContent() {
         authorName,
         title: newTitle.trim(),
         content: newContent.trim(),
-        imageUrl,
+        imageUrls: uploadedUrls,
         createdAt: Timestamp.now(),
         likes: [],
         comments: [],
@@ -146,7 +147,7 @@ function BlogsContent() {
       
       setNewTitle("");
       setNewContent("");
-      setSelectedFile(null);
+      setSelectedFiles([]);
       setShowCreateForm(false);
     } catch (error) {
       console.error("Error creating blog:", error);
@@ -285,6 +286,7 @@ function BlogsContent() {
                   <Input 
                     type="file" 
                     accept="image/*"
+                    multiple
                     onChange={handleFileChange}
                     className="hidden"
                     id="blog-image"
@@ -295,10 +297,10 @@ function BlogsContent() {
                     className="flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer hover:bg-muted transition-colors text-sm font-medium"
                   >
                     <ImageIcon className="w-4 h-4" />
-                    {selectedFile ? selectedFile.name : "Upload Cover Image"}
+                    {selectedFiles.length > 0 ? `${selectedFiles.length} files selected` : "Upload Images"}
                   </label>
-                  {selectedFile && (
-                    <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedFile(null)} className="text-red-500 h-8 px-2">
+                  {selectedFiles.length > 0 && (
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedFiles([])} className="text-red-500 h-8 px-2">
                       Clear
                     </Button>
                   )}
@@ -330,11 +332,19 @@ function BlogsContent() {
             
             return (
               <Card key={blog.id} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                {blog.imageUrl && (
+                {(blog.imageUrls && blog.imageUrls.length > 0) ? (
+                  <div className={`grid ${blog.imageUrls.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-1 w-full bg-muted`}>
+                    {blog.imageUrls.map((url, i) => (
+                      <div key={i} className={`relative ${blog.imageUrls && blog.imageUrls.length === 1 ? 'h-64 md:h-80' : 'h-48 md:h-64'} w-full`}>
+                        <Image src={url} alt={`${blog.title} image ${i+1}`} fill className="object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (blog.imageUrl && (
                   <div className="w-full h-64 md:h-80 relative bg-muted">
                     <Image src={blog.imageUrl} alt={blog.title} fill className="object-cover" />
                   </div>
-                )}
+                ))}
                 <CardHeader className="pb-4">
                   <div className="flex justify-between items-start gap-4">
                     <div className="space-y-2">
