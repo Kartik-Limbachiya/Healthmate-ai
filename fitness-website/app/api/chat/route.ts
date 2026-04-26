@@ -111,7 +111,7 @@ Weight: ${combinedTraits.weight ? combinedTraits.weight + 'kg' : 'Unknown'}
 Height: ${combinedTraits.height ? combinedTraits.height + 'm' : 'Unknown'}
 Fitness Goal: ${combinedTraits.goal || 'Unknown'}
 Active Meal Plan: ${combinedTraits.activeMealPlanId || 'None'}
-Daily Nutrition Targets: ${combinedTraits.nutritionGoals ? \`Calories: \${combinedTraits.nutritionGoals.calories}, Protein: \${combinedTraits.nutritionGoals.protein}g, Carbs: \${combinedTraits.nutritionGoals.carbs}g, Fat: \${combinedTraits.nutritionGoals.fat}g\` : 'Unknown'}
+Daily Nutrition Targets: ${combinedTraits.nutritionGoals ? 'Calories: ' + combinedTraits.nutritionGoals.calories + ', Protein: ' + combinedTraits.nutritionGoals.protein + 'g, Carbs: ' + combinedTraits.nutritionGoals.carbs + 'g, Fat: ' + combinedTraits.nutritionGoals.fat + 'g' : 'Unknown'}
 ---
 ${todayMealsContext || "No meals logged yet today."}
 ---
