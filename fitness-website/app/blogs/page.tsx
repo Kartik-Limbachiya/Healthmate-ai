@@ -128,7 +128,10 @@ function BlogsContent() {
     try {
       let uploadedUrls: string[] = [];
       if (selectedFiles.length > 0) {
-        uploadedUrls = await Promise.all(selectedFiles.map(file => uploadImage(file)));
+        for (const file of selectedFiles) {
+          const url = await uploadImage(file);
+          uploadedUrls.push(url);
+        }
       }
 
       const authorName = profile?.name || user.displayName || "Fitness Enthusiast";
@@ -336,13 +339,13 @@ function BlogsContent() {
                   <div className={`grid ${blog.imageUrls.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-1 w-full bg-muted`}>
                     {blog.imageUrls.map((url, i) => (
                       <div key={i} className={`relative ${blog.imageUrls && blog.imageUrls.length === 1 ? 'h-64 md:h-80' : 'h-48 md:h-64'} w-full`}>
-                        <Image src={url} alt={`${blog.title} image ${i+1}`} fill className="object-cover" />
+                        <Image src={url} alt={`${blog.title} image ${i+1}`} fill className="object-contain" />
                       </div>
                     ))}
                   </div>
                 ) : (blog.imageUrl && (
                   <div className="w-full h-64 md:h-80 relative bg-muted">
-                    <Image src={blog.imageUrl} alt={blog.title} fill className="object-cover" />
+                    <Image src={blog.imageUrl} alt={blog.title} fill className="object-contain" />
                   </div>
                 ))}
                 <CardHeader className="pb-4">
