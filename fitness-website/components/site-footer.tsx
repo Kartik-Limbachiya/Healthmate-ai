@@ -67,17 +67,17 @@ export default function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-primary">
+                <Link href="/health-guides" className="text-gray-400 hover:text-primary">
                   Health Guides
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-primary">
+                <Link href="/nutrition-tips" className="text-gray-400 hover:text-primary">
                   Nutrition Tips
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-primary">
+                <Link href="/faq" className="text-gray-400 hover:text-primary">
                   FAQ
                 </Link>
               </li>
@@ -87,22 +87,22 @@ export default function SiteFooter() {
             <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">Company</h3>
             <ul className="space-y-2 text-xs sm:text-sm">
               <li>
-                <Link href="#" className="text-gray-400 hover:text-primary">
+                <Link href="/about-us" className="text-gray-400 hover:text-primary">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-primary">
+                <Link href="/careers" className="text-gray-400 hover:text-primary">
                   Careers
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-primary">
+                <Link href="/privacy-policy" className="text-gray-400 hover:text-primary">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-primary">
+                <Link href="/terms-of-service" className="text-gray-400 hover:text-primary">
                   Terms of Service
                 </Link>
               </li>
