@@ -148,6 +148,7 @@ export default function LivePlank() {
   };
 
   const handleJsonFeedback = (data: any) => {
+    if (data.type === "ping") return; // Ignore keepalive pings
     if (data.feedback) { setFeedback((prev) => [...prev.slice(-3), data.feedback]); setCurrentStatus(data.feedback); }
     if (typeof data.has_error === "boolean") setHasError(data.has_error);
     if (typeof data.hold_time === "number") setHoldTime(data.hold_time);

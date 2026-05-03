@@ -147,6 +147,7 @@ export default function LiveLunge() {
   };
 
   const handleJsonFeedback = (data: any) => {
+    if (data.type === "ping") return; // Ignore keepalive pings
     if (data.feedback) { setFeedback((prev) => [...prev.slice(-3), data.feedback]); setCurrentStatus(data.feedback); }
     if (typeof data.count === "number") setRepCount(data.count);
     if (typeof data.has_error === "boolean") setHasError(data.has_error);

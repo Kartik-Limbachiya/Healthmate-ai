@@ -171,6 +171,7 @@ export default function LiveBicepCurl() {
   };
 
   const handleJsonFeedback = (data: any) => {
+    if (data.type === "ping") return; // Ignore keepalive pings
     if (data.feedback && typeof data.feedback === "string") {
       setFeedback((prev) => [...prev.slice(-3), data.feedback]);
       setCurrentStatus(data.feedback);
