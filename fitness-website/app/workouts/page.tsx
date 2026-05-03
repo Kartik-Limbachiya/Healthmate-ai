@@ -39,7 +39,7 @@ export default function WorkoutsPage() {
       {/* AI ANALYZER SECTION */}
       <div className="mb-8 sm:mb-12">
         <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-center">AI Analyzers</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           <Card className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
             <CardHeader className="p-4 sm:p-6">
               <CardTitle className="text-lg sm:text-xl">Live Squat Analyzer</CardTitle>
@@ -64,6 +64,48 @@ export default function WorkoutsPage() {
               </p>
               <Link href="/workouts/LiveWorkout/LivePushup">
                 <Button variant="secondary" className="w-full sm:w-auto">Start Live Pushup</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-orange-500 to-amber-600 text-white">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">Live Bicep Curl Analyzer</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <p className="mb-4 text-sm sm:text-base">
+                Perfect your bicep curl form with real-time AI feedback.
+              </p>
+              <Link href="/workouts/LiveWorkout/LiveBicepCurl">
+                <Button variant="secondary" className="w-full sm:w-auto">Start Bicep Curl</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">Live Plank Analyzer</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <p className="mb-4 text-sm sm:text-base">
+                Hold your plank while AI monitors your posture in real time.
+              </p>
+              <Link href="/workouts/LiveWorkout/LivePlank">
+                <Button variant="secondary" className="w-full sm:w-auto">Start Plank</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">Live Lunge Analyzer</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <p className="mb-4 text-sm sm:text-base">
+                Master your lunge technique with AI-powered knee tracking.
+              </p>
+              <Link href="/workouts/LiveWorkout/LiveLunge">
+                <Button variant="secondary" className="w-full sm:w-auto">Start Lunge</Button>
               </Link>
             </CardContent>
           </Card>
