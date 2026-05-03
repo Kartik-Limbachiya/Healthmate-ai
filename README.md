@@ -1,3 +1,6 @@
+# https://github.com/Kartik32004/Squat_analyzer_api/tree/main
+# https://github.com/Kartik32004/new-pushups-analyzer-api/tree/main
+
 # HealthMate: Your AI-Driven Fitness Companion 🚀
 
 HealthMate is your ultimate web-based fitness partner, crafted to offer a personalized and impactful experience for achieving a healthier lifestyle. Powered by Artificial Intelligence, we provide you with tailored fitness and nutrition solutions that go beyond the basics.
